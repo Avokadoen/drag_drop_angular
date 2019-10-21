@@ -1,0 +1,16 @@
+.form-size {
+  width: 35vw;
+}
+
+mat-dialog-container {
+  width: 80vw;
+  height: 90vh;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.form-field-div {
+  width: 100%;
+}

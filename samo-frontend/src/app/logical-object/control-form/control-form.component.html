@@ -1,0 +1,72 @@
+<div fxLayout="column">
+  <div fxLayout="row" fxLayoutAlign="space-around center">
+    <button mat-raised-button class="mat-primary" (click)="closeSaveDialog()"
+            [disabled]="!validForm">
+      <mat-icon>check</mat-icon>
+      Lagre
+    </button>
+    <button mat-raised-button class="mat-primary" (click)="closeDialog()">
+      Lukk
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div fxLayout="row">
+    <div fxLayout="column" class="form-field-div" [formGroup]="objectFormGroup">
+      <mat-form-field class="form-size">
+        <input type="text" placeholder="Strekkode objekt" aria-label="strekkode" matInput formControlName="nbId" required="true">
+      </mat-form-field>
+      <!-- css class does not work -->
+      <mat-form-field class="form-size">
+        <input type="text" placeholder="Avleverers referanse" aria-label="Deres id" matInput formControlName="externalId" required="true">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Materialtype</mat-label>
+        <mat-select formControlName="materialType" required="true">
+          <mat-option *ngFor="let materialType of allMaterialType" [value]="materialType">
+            {{materialType}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Kontrakt variant</mat-label>
+        <mat-select formControlName="contractType" required="true">
+          <mat-option *ngFor="let contractType of allContractType" [value]="contractType">
+            {{contractType}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="form-size">
+        <input type="text" placeholder="Tittel/Sammling" aria-label="tittel/sammling" matInput
+               formControlName="collectionTitle" required="true">
+      </mat-form-field>
+      <mat-form-field>
+        <label>
+          <textarea matInput placeholder="Merknad" value="{{objectData.notice}}"></textarea>
+        </label>
+      </mat-form-field>
+      <mat-form-field class="form-size">
+        <input type="text" placeholder="Strekkode beholder" aria-label="Beholderid" matInput
+               formControlName="containerId" required="true">
+      </mat-form-field>
+    </div>
+    <div fxFlex="3"></div>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="space-around center">
+    <button mat-raised-button class="mat-primary" (click)="closeSaveDialog()">
+      <mat-icon>arrow_back_ios</mat-icon>
+      Forrige
+    </button>
+    <button mat-raised-button class="mat-primary" (click)="closeSaveDialog()">
+      Neste
+      <mat-icon>arrow_forward_ios</mat-icon>
+    </button>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="space-around center">
+    <button mat-raised-button class="mat-primary" (click)="closeSaveDialog()">
+      Registrer nytt objekt
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+<mat-form-field>
+  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filtrer tabell elementer">
+</mat-form-field>
+
+<section class="selection-section">
+  <mat-checkbox checked="true" value="nbId:0"             >NB id</mat-checkbox>
+  <mat-checkbox                value="organisationId:1"   >Organisasjonsid</mat-checkbox>
+  <mat-checkbox checked="true" value="externalId:2"       >Deres id</mat-checkbox>
+  <mat-checkbox checked="true" value="materialType:3"     >Materialtype</mat-checkbox>
+  <mat-checkbox checked="true" value="materialCondition:4">Tilstand</mat-checkbox>
+  <mat-checkbox checked="true" value="contractType:5"     >Kontraktvariant</mat-checkbox>
+  <mat-checkbox checked="true" value="collectionTitle:6"  >Sammlingstittel</mat-checkbox>
+  <mat-checkbox                value="notice:7"           >Avvik</mat-checkbox>
+  <mat-checkbox checked="true" value="containerId:8"      >Beholderid</mat-checkbox>
+</section>
+
+<div>
+  <table mat-table [dataSource]="dataSource" matSort fxFill>
+    <ng-container matColumnDef="nbId">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Strekkode objekt</th>
+      <td mat-cell *matCellDef="let element"> {{element.nbId}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="organisationId">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Organisasjonsid </th>
+      <td mat-cell *matCellDef="let element"> {{element.organisationId}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="externalId">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Avleverers referanse </th>
+      <td mat-cell *matCellDef="let element"> {{element.externalId}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="materialType">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Materialtype </th>
+      <td mat-cell *matCellDef="let element"> {{element.materialType}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="materialCondition">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Tilstand </th>
+      <td mat-cell *matCellDef="let element"> {{element.materialCondition}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="contractType">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Kontraktvariant </th>
+      <td mat-cell *matCellDef="let element"> {{element.contractType}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="collectionTitle">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Sammlingstittel </th>
+      <td mat-cell *matCellDef="let element"> {{element.collectionTitle}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="notice">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Avvik </th>
+      <td mat-cell *matCellDef="let element"> {{element.notice}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="containerId">
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> Stekkode beholder </th>
+      <td mat-cell *matCellDef="let element"> {{element.containerId}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr class="table-element" mat-row *matRowDef="let row; columns: displayedColumns;" (click)="storageObjectSelected(row)"></tr>
+  </table>
+  <div fxLayout="column" fxLayoutAlign="center center" >
+    <mat-paginator fxFill fxLayoutAlign="center start" [pageSizeOptions]="[5, 10, 20, 40]" showFirstLastButtons></mat-paginator>
+    <button mat-raised-button class="mat-primary" (click)="registerNewStorageObject()">
+      Registrer nytt objekt
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+  </div>
+
+</div>
+
+
