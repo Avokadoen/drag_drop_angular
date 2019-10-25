@@ -2,9 +2,9 @@ import {Component, Inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
-import {StorageObjectData} from '../../models/storage-object-data';
-import {MaterialType} from '../../models/material-type.enum';
-import {ContractType} from '../../models/contract-type.enum';
+import {StorageObjectData} from '../../shared/models/storage-object-data';
+import {MaterialType} from '../../shared/models/material-type.enum';
+import {ContractType} from '../../shared/models/contract-type.enum';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
 // TODO: formcontrol for each field

@@ -1,0 +1,41 @@
+mat-form-field {
+  width: 100%;
+}
+
+mat-checkbox {
+  margin: 0 10px;
+}
+
+mat-progress-bar {
+  height: 5px;
+}
+
+table {
+  margin: 10px 0;
+}
+
+.table-element-idle:hover {
+  filter: drop-shadow(0px 0px 12px rgb(50%, 50%, 50%));
+}
+
+.table-element-loading {
+  background-color: #d3d3d3;
+}
+
+.table-element-idle {
+  background: inherit;
+}
+
+.table-element-loading, .table-element-idle {
+  height: 48px;
+}
+
+.fill-Width {
+  width: 100%
+}
+
+.selection-section {
+  display: flex;
+  align-content: center;
+  align-items: center;
+}

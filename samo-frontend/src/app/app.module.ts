@@ -12,20 +12,28 @@ import {
   MatToolbarModule
 } from '@angular/material';
 import { HeaderComponent } from './fixed-elements/header/header.component';
-import { ControlFormComponent } from './logical-object/control-form/control-form.component';
+import { ControlFormComponent } from './storage-object/control-form/control-form.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {FlexModule} from '@angular/flex-layout';
-import { ObjectRootComponent } from './logical-object/object-root.component';
-import { DeliveryListComponent } from './logical-object/delivery-list/delivery-list.component';
+import { ObjectRootComponent } from './storage-object/object-root.component';
+import { DeliveryListComponent } from './storage-object/delivery-list/delivery-list.component';
 // tslint:disable-next-line:max-line-length
-import { GenerateRegisterDeliveryComponent } from './logical-object/generate-register-delivery/generate-register-delivery.component';
+import { GenerateRegisterDeliveryComponent } from './storage-object/generate-register-delivery/generate-register-delivery.component';
 import {RouterModule, Routes} from '@angular/router';
 import { NotFoundPageComponent } from './fixed-elements/not-found-page/not-found-page.component';
-import {ObjectRetrieverService} from './services/object-retriever.service';
+import {ObjectRetrieverService} from './shared/object-retriever.service';
 import {HttpClientModule} from "@angular/common/http";
 import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import { InternalDashboardComponent } from './internal-dashboard/internal-dashboard.component';
+import {MatDividerModule} from "@angular/material/divider";
+import {MatExpansionModule} from "@angular/material/expansion";
+import {MatListModule} from "@angular/material/list";
+import {MatSidenavModule} from "@angular/material/sidenav";
 
 const appRoutes: Routes = [
+  { path: 'dashboard/:user', component: InternalDashboardComponent},
   { path: 'delivery-list/:id', component: DeliveryListComponent},
   { path: 'generate-register', component: GenerateRegisterDeliveryComponent},
   { path: '', pathMatch: 'full', component: ObjectRootComponent},
@@ -41,12 +49,13 @@ const appRoutes: Routes = [
     DeliveryListComponent,
     GenerateRegisterDeliveryComponent,
     NotFoundPageComponent,
+    InternalDashboardComponent,
   ],
   entryComponents: [ControlFormComponent],
   imports: [
     RouterModule.forRoot(
       appRoutes,
-      { enableTracing: false } // <-- debugging purposes only
+      {enableTracing: false} // <-- debugging purposes only
     ),
     BrowserModule,
     HttpClientModule,
@@ -69,6 +78,12 @@ const appRoutes: Routes = [
     MatCheckboxModule,
     RouterModule,
     MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatDividerModule,
+    MatExpansionModule,
+    MatListModule,
+    MatSidenavModule,
   ],
   providers: [ObjectRetrieverService],
   bootstrap: [AppComponent]

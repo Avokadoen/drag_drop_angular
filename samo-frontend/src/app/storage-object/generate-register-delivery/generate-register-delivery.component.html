@@ -1,0 +1,49 @@
+<div fxLayout="row" class="master-container" fxLayoutAlign="center center">
+  <mat-card class="example-card">
+    <mat-card-header>
+      <mat-card-title>
+        Registrer ny forsendelse
+        <mat-icon>home_work</mat-icon>
+      </mat-card-title>
+      <mat-card-subtitle>generer en sammling av objekter til leveranse</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div fxLayout="column" [formGroup]="formGroup">
+        <mat-form-field class="form-size">
+          <input type="text" placeholder="Id prefix" aria-label="Id prefix" matInput formControlName="idPrefixForm" required="true">
+        </mat-form-field>
+        <mat-form-field class="form-size">
+          <input type="integer" placeholder="Antall" aria-label="antall" matInput formControlName="idRangeForm" required="true">
+        </mat-form-field>
+        <mat-form-field class="form-size">
+          <input type="integer" placeholder=Sammlingstittel aria-label="sammlingsittel" matInput formControlName="collectionTitleForm" required="true">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Kontrakttype</mat-label>
+          <mat-select formControlName="contractTypeForm" required="true">
+            <mat-option *ngFor="let contractType of allContractType" [value]="contractType">
+              {{contractType}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <div fxLayout="row" fxFlex="grow">
+        <div dir="ltr" fxFlex="50">
+          <button mat-raised-button class="mat-accent">
+            <mat-icon>close</mat-icon>
+            Avbryt
+          </button>
+        </div>
+        <div dir="rtl" fxFlex="50">
+          <button mat-raised-button class="mat-accent" (click)="generateDelivery()">
+            <mat-icon>check</mat-icon>
+            Generer leveranse
+          </button>
+        </div>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+
+</div>

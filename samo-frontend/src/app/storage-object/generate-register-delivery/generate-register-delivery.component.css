@@ -1,0 +1,13 @@
+.master-container {
+  height: calc(100vh - 64px);
+}
+
+mat-card-title {
+  text-align: center;
+}
+
+mat-card {
+  height: calc(80vh - 64px);
+  width: calc(80vw - 64px);
+}
+

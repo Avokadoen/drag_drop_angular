@@ -1,5 +1,7 @@
 package no.nb.samo.model;
 
+import java.util.Comparator;
+
 public class StorageObject {
     private String nbId;
     private String organisationId;
@@ -24,6 +26,9 @@ public class StorageObject {
         this.collectionTitle = collectionTitle;
         this.notice = notice;
         this.containerId = containerId;
+    }
+
+    StorageObject() {
     }
 
     public String getNbId() {
@@ -97,4 +102,26 @@ public class StorageObject {
     public void setContainerId(String containerId) {
         this.containerId = containerId;
     }
+
+    public static class SortbyNbId implements Comparator<StorageObject>
+    {
+        // Used for sorting in ascending order of
+        // roll number
+        public int compare(StorageObject a, StorageObject b)
+        {
+            return a.getNbId().compareTo(b.getNbId());
+        }
+    }
+
+    public static class SortbyOrganisationId implements Comparator<StorageObject>
+    {
+        // Used for sorting in ascending order of
+        // roll number
+        public int compare(StorageObject a, StorageObject b)
+        {
+            return a.getOrganisationId().compareTo(b.getOrganisationId());
+        }
+    }
 }
+
+

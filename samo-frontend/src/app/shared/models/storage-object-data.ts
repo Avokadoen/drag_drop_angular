@@ -6,6 +6,8 @@ export interface StorageObjectData {
   nbId: string;
   organisationId: string;
   externalId: string;
+  // TODO  creator?
+  // TODO rename materialType to materialCategory
   /* Plate, bånd, kasset */
   materialType: MaterialType;
   materialCondition: MaterialCondition;

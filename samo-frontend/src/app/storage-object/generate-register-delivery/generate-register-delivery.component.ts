@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {StorageObjectData} from '../../models/storage-object-data';
-import {ContractType} from '../../models/contract-type.enum';
-import {MaterialCondition} from '../../models/material-condition.enum';
-import {MaterialType} from '../../models/material-type.enum';
+import {StorageObjectData} from '../../shared/models/storage-object-data';
+import {ContractType} from '../../shared/models/contract-type.enum';
+import {MaterialCondition} from '../../shared/models/material-condition.enum';
+import {MaterialType} from '../../shared/models/material-type.enum';
 
 @Component({
   selector: 'app-generate-register-delivery',

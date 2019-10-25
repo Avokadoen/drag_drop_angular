@@ -1,21 +1,23 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild, ViewChildren} from '@angular/core';
 import {MatCheckbox, MatCheckboxChange, MatDialog, MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
-import {StorageObjectData} from '../../models/storage-object-data';
-import {ObjectRetrieverService} from '../../services/object-retriever.service';
+import {StorageObjectData} from '../../shared/models/storage-object-data';
+import {ObjectRetrieverService} from '../../shared/object-retriever.service';
 import {ControlFormComponent} from '../control-form/control-form.component';
-import {MaterialType} from '../../models/material-type.enum';
-import {MaterialCondition} from '../../models/material-condition.enum';
-import {ContractType} from '../../models/contract-type.enum';
+import {MaterialType} from '../../shared/models/material-type.enum';
+import {MaterialCondition} from '../../shared/models/material-condition.enum';
+import {ContractType} from '../../shared/models/contract-type.enum';
 import {ActivatedRoute, Params} from '@angular/router';
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {environment} from "../../../environments/environment";
+import {catchError, map, startWith, switchMap} from "rxjs/operators";
+import {merge, Observable} from "rxjs";
+import {PageEvent} from "@angular/material/paginator";
 
 @Component({
   selector: 'app-delivery-object-list',
   templateUrl: './delivery-list.component.html',
   styleUrls: ['./delivery-list.component.css']
 })
-export class DeliveryListComponent implements OnInit, AfterViewInit {
+export class DeliveryListComponent implements AfterViewInit {
 
   masterColumnList: string[] = [
     'nbId', 'externalId', 'materialType', 'materialCondition',
@@ -24,28 +26,62 @@ export class DeliveryListComponent implements OnInit, AfterViewInit {
 
   displayedColumns: string[];
 
-  @ViewChild(MatPaginator, {static: true})
+  @ViewChild(MatPaginator, {static: false})
   paginator: MatPaginator;
-  @ViewChild(MatSort, {static: true})
+  @ViewChild(MatSort, {static: false})
   sort: MatSort;
   @ViewChildren(MatCheckbox)
   checkboxes: MatCheckbox[];
 
-  dataSource: MatTableDataSource<StorageObjectData>;
+  dataSource: MatTableDataSource<StorageObjectData>  = new MatTableDataSource();
+  isLoadingResults = true;
+  deliveryId: string;
 
   constructor(private dialog: MatDialog,
               private objectRetrieverService: ObjectRetrieverService,
               private route: ActivatedRoute,
-              private _snackBar: MatSnackBar) {
+              private snackBar: MatSnackBar) {
     this.displayedColumns = this.masterColumnList;
   }
 
-  ngOnInit() {
-    this.route.params.subscribe(params => this.handleParamsChange(params));
-  }
-
   ngAfterViewInit(): void {
-    this.checkboxes.forEach(c => c.change.subscribe(v => this.tableColumnChange(v)));
+    this.route.params.subscribe(params => {
+      this.deliveryId = params.id;
+      this.paginator.page.emit(new PageEvent())
+    });
+
+    const checkBoxEvents = this.checkboxes.map(check => check.change.asObservable());
+    merge(... checkBoxEvents).subscribe(change  => {
+      this.updateDisplayColumns(change)
+    });
+
+    // this.dataSource.sort = this.sort;
+    this.paginator.page.pipe(
+      startWith({}),
+      switchMap(() => {
+        this.isLoadingResults = true;
+        return this.objectRetrieverService.getDeliveryBatch(this.deliveryId, this.paginator.pageIndex, this.paginator.pageSize)
+      }),
+      map(data => {
+        this.isLoadingResults = false;
+        this.paginator.length = data.objectCount;
+
+        return data.storageObjects;
+      }),
+      catchError(() => {
+        this.isLoadingResults = false;
+
+        this.snackBar.open('failed to retrieve page', 'ok', {
+          duration: 20000,
+        });
+
+        return new Observable<void>();
+      })
+    ).subscribe(data => {
+      if (data) {
+        this.dataSource.data = data
+      }
+    });
   }
 
   applyFilter(filterValue: string) {
@@ -56,33 +92,7 @@ export class DeliveryListComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private handleParamsChange(params: Params) {
-    // TODO: loading indication?
-    if (!params.id) {
-      return;
-    }
-    this.objectRetrieverService.getDeliveryBatch(params.id, 0, 5).subscribe(batch => {
-      this.dataSource = new MatTableDataSource(batch);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    }, error => {
-      if (!environment.production) {
-        console.log('failed to retrieve delivery');
-        console.log(error);
-      }
-
-      let errorMessage = 'an error has occurred';
-      if (error instanceof ErrorEvent) {
-        errorMessage = error.message;
-      }
-
-      this._snackBar.open(errorMessage, 'ok', {
-        duration: 20000,
-      });
-    });
-  }
-
-  private tableColumnChange(event: MatCheckboxChange): void {
+  private updateDisplayColumns(event: MatCheckboxChange): void {
     const column = event.source.value.split(':')[0];
     const index = parseInt(event.source.value.split(':')[1], 10);
     if (event.checked) {
@@ -93,6 +103,10 @@ export class DeliveryListComponent implements OnInit, AfterViewInit {
   }
 
   storageObjectSelected(incoming: StorageObjectData) {
+    if (this.isLoadingResults) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(ControlFormComponent, {
       width: '80vw',
       height: '80vh',

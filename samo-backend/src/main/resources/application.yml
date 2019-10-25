@@ -1,2 +1,5 @@
 Samo:
-  objectCacheSize: 120
+  testObjectCount: 10000
+
+server:
+  address: 158.39.123.108
