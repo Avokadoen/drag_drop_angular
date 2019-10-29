@@ -14,7 +14,7 @@ import {
 import { HeaderComponent } from './fixed-elements/header/header.component';
 import { ControlFormComponent } from './storage-object/control-form/control-form.component';
 import {ReactiveFormsModule} from '@angular/forms';
-import {FlexModule} from '@angular/flex-layout';
+import {ExtendedModule, FlexModule} from '@angular/flex-layout';
 import { ObjectRootComponent } from './storage-object/object-root.component';
 import { DeliveryListComponent } from './storage-object/delivery-list/delivery-list.component';
 // tslint:disable-next-line:max-line-length
@@ -31,11 +31,13 @@ import {MatDividerModule} from "@angular/material/divider";
 import {MatExpansionModule} from "@angular/material/expansion";
 import {MatListModule} from "@angular/material/list";
 import {MatSidenavModule} from "@angular/material/sidenav";
+import { ReactiveTestComponent } from './reactive-test/reactive-test.component';
 
 const appRoutes: Routes = [
   { path: 'dashboard/:user', component: InternalDashboardComponent},
   { path: 'delivery-list/:id', component: DeliveryListComponent},
   { path: 'generate-register', component: GenerateRegisterDeliveryComponent},
+  { path: 'test', component: ReactiveTestComponent},
   { path: '', pathMatch: 'full', component: ObjectRootComponent},
   { path: '**', component: NotFoundPageComponent},
 ];
@@ -50,6 +52,7 @@ const appRoutes: Routes = [
     GenerateRegisterDeliveryComponent,
     NotFoundPageComponent,
     InternalDashboardComponent,
+    ReactiveTestComponent,
   ],
   entryComponents: [ControlFormComponent],
   imports: [
@@ -84,6 +87,7 @@ const appRoutes: Routes = [
     MatExpansionModule,
     MatListModule,
     MatSidenavModule,
+    ExtendedModule,
   ],
   providers: [ObjectRetrieverService],
   bootstrap: [AppComponent]

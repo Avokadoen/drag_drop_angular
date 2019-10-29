@@ -12,6 +12,9 @@ mat-progress-bar {
 
 table {
   margin: 10px 0;
+  max-height: calc(100vh - 64px);
+  width: 100%;
+  overflow: auto;
 }
 
 .table-element-idle:hover {
@@ -28,6 +31,11 @@ table {
 
 .table-element-loading, .table-element-idle {
   height: 48px;
+}
+
+.table-container {
+  max-height: calc(100vh - 250px);
+  overflow: scroll;
 }
 
 .fill-Width {

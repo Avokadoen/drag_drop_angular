@@ -1,0 +1,41 @@
+<h2>omskaler vinduet for å se effekt</h2>
+<mat-horizontal-stepper>
+  <mat-step>
+    <ng-template matStepLabel>
+      Dynamisk layout
+      <mat-icon>view_quilt</mat-icon>
+    </ng-template>
+    <div fxLayout="row" class="parent-container-wide" fxLayout.lt-md="column" ngClass.lt-md="parent-container-narrow">
+      <div fxFlex="50" class="half-screen-rect green-color"></div>
+      <div fxFlex="50" class="half-screen-rect blue-color"></div>
+    </div>
+  </mat-step>
+  <mat-step >
+    <ng-template matStepLabel>
+      Dynamisk styling
+      <mat-icon>gesture</mat-icon>
+    </ng-template>
+    <div
+      style="font-style: italic"
+      [ngStyle.xs]="{'font-size.px': 50, color: 'blue', 'background-color': 'lightblue'}"
+      [ngStyle.sm]="{'font-size.px': 60, color: 'lightblue', 'background-color': 'blue'}"
+      [ngStyle.md]="{'font-size.px': 70, color: 'orange', 'background-color': 'purple'}"
+      [ngStyle]="{'font-size.px': 80, color: 'purple', 'background-color': 'orange'}">
+      <p style="font-size: inherit; color: inherit;">hello world!</p>
+    </div>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>
+      Dynamisk inkludering av element
+      <mat-icon>view_week</mat-icon>
+    </ng-template>
+    <div fxLayout="row" [ngStyle]="{'background-color': 'lightblue'}">
+      <!-- fxHide fxShow.xs="true" -->
+      <div class="array-container"><p>1</p></div>
+      <div fxHide.lt-sm class="array-container"><p>2</p></div>
+      <div fxHide.lt-md class="array-container"><p>3</p></div>
+      <div fxHide.lt-lg class="array-container"><p>4</p></div>
+      <div fxHide.lt-xl class="array-container"><p>5</p></div>
+    </div>
+  </mat-step>
+</mat-horizontal-stepper>

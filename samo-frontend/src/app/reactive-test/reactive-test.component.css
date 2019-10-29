@@ -1,0 +1,33 @@
+.half-screen-rect {
+  height: 400px;
+  border-style: solid;
+  border-width: 4px;
+  border-color: black;
+}
+
+.parent-container-wide  {
+  width: 100vw;
+  height: 400px;
+}
+
+.green-color {
+  background-color: #006600;
+}
+
+.blue-color {
+  background-color: #0074D9;
+}
+
+.parent-container-narrow {
+  width: 100vw;
+  height: 400px;
+}
+
+.array-container {
+  height: 100px;
+  width: 400px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+  text-align: center;
+}

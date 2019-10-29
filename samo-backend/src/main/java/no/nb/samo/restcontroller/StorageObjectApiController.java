@@ -47,6 +47,10 @@ public class StorageObjectApiController {
         return new Delivery(deliveryId, so.size(), so.subList(fromIndex, toIndex));
     }
 
+//    @GetMapping(path="/getDeliveries")
+//    public Delivery[] getDeliveries(@RequestParam(value ="organisationNumber", required = false) String organisationNumber) {
+//    }
+
     private ArrayList<StorageObject> generateNewTestDelivery(String deliveryId) {
         int testObjectCount = random.nextInt(4900) + 100; // 100 <-> 5000
         ArrayList<StorageObject> testDelivery = new ArrayList<>(testObjectCount);
