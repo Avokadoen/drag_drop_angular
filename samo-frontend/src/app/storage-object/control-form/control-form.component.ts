@@ -26,7 +26,6 @@ export class ControlFormComponent implements OnInit {
   // TODO: ContractType iter pipe for html selection
   allContractType = [ContractType.RETURN, ContractType.KEEP];
 
-  filteredOptions: Observable<string[]>;
 
   constructor(
     public dialogRef: MatDialogRef<ControlFormComponent>,
@@ -38,7 +37,6 @@ export class ControlFormComponent implements OnInit {
 
     this.objectFormGroup =  new FormGroup({
       nbId:               new FormControl(this.objectData.nbId, commonValidators),
-     // organisationId:     new FormControl(this.objectData.organisationId, commonValidators),
       externalId:         new FormControl(this.objectData.externalId, commonValidators),
       materialType:       new FormControl(this.objectData.materialType, commonValidators),
       materialCondition:  new FormControl(this.objectData.materialCondition, commonValidators),
@@ -46,12 +44,8 @@ export class ControlFormComponent implements OnInit {
       collectionTitle:    new FormControl(this.objectData.collectionTitle, commonValidators),
       notice:             new FormControl(this.objectData.notice),
       containerId:        new FormControl(this.objectData.containerId, commonValidators),
+      deliveryId:         new FormControl(this.objectData.deliveryId, commonValidators),
     });
-
-    /*this.filteredOptions = this.objectFormGroup.get('organisationId').valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value))
-    );*/
 
     this.validForm = !this.objectFormGroup.errors;
     this.objectFormGroup.valueChanges.subscribe(() => {
@@ -59,11 +53,6 @@ export class ControlFormComponent implements OnInit {
     });
 
     // TODO: load OrganisationNrOptions
-  }
-
-  private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.allOrganisationId.filter(option => option.toLowerCase().indexOf(filterValue) === 0);
   }
 
   closeDialog(): void {
@@ -79,7 +68,6 @@ export class ControlFormComponent implements OnInit {
   closeSaveDialog(): void {
     // TODO: error if input errors, disable button
     const newObjectData: StorageObjectData = this.objectFormGroup.value;
-    console.log(newObjectData.nbId);
     this.dialogRef.close(newObjectData);
   }
 }

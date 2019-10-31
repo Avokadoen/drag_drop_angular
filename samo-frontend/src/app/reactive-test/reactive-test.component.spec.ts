@@ -8,7 +8,7 @@ describe('ReactiveTestComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ReactiveTestComponent ]
+      declarations: [ ReactiveTestComponent ],
     })
     .compileComponents();
   }));

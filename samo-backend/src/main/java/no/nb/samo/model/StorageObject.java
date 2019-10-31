@@ -1,6 +1,7 @@
 package no.nb.samo.model;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 public class StorageObject {
     private String nbId;
@@ -12,11 +13,12 @@ public class StorageObject {
     private String collectionTitle;
     private String notice;
     private String containerId;
+    private String deliveryId;
 
     public StorageObject(String nbId, String organisationId, String externalId,
                          String materialType, String materialCondition,
                          String contractType, String collectionTitle, String notice,
-                         String containerId) {
+                         String containerId, String deliveryId) {
         this.nbId = nbId;
         this.organisationId = organisationId;
         this.externalId = externalId;
@@ -26,6 +28,7 @@ public class StorageObject {
         this.collectionTitle = collectionTitle;
         this.notice = notice;
         this.containerId = containerId;
+        this.deliveryId = deliveryId;
     }
 
     StorageObject() {
@@ -101,6 +104,27 @@ public class StorageObject {
 
     public void setContainerId(String containerId) {
         this.containerId = containerId;
+    }
+
+    public String getDeliveryId() {
+        return deliveryId;
+    }
+
+    public void setDeliveryId(String deliveryId) {
+        this.deliveryId = deliveryId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StorageObject that = (StorageObject) o;
+        return nbId.equals(that.nbId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nbId);
     }
 
     public static class SortbyNbId implements Comparator<StorageObject>

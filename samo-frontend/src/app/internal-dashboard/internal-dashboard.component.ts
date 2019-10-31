@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Pipe, PipeTransform, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {MatTableDataSource} from "@angular/material/table";
 import {ObjectRetrieverService} from "../shared/object-retriever.service";
@@ -53,7 +53,6 @@ export class InternalDashboardComponent implements OnInit {
   // TODO: validator that takes organisations and makes sure it matches on of the ids loaded
   organisationFormControl = new FormControl('');
   organisationIds: string[];
-  filteredOrgIds: Observable<string[]>;
 
   @ViewChild(MatDrawer, {static: false})
   drawer: MatDrawer;
@@ -89,23 +88,12 @@ export class InternalDashboardComponent implements OnInit {
           this.organisationFormControl.setValue(this.organisationFormControl.value);
         }
     });
-
-    this.filteredOrgIds = this.organisationFormControl.valueChanges
-      .pipe(
-        startWith(''),
-        map(value => this.organisationIdFilter(value))
-      );
   }
 
   routeToDelivery(deliveryId: string): void  {
     this.router
       .navigate(['delivery-list', deliveryId])
       .catch(e => console.log(`failed to route! error: ${e}`)); // TODO toast
-  }
-
-  private organisationIdFilter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.organisationIds.filter(option => option.toLowerCase().includes(filterValue));
   }
 
   private toggleDrawer() {
@@ -121,3 +109,6 @@ export class InternalDashboardComponent implements OnInit {
   }
 
 }
+
+
+

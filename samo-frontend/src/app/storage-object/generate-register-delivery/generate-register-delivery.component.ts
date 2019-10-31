@@ -29,7 +29,7 @@ export class GenerateRegisterDeliveryComponent implements OnInit {
     });
   }
 
-  // TODO: backend logic
+  // TODO: remove me -> backend logic
   // request generation with form -> response with ok and a delivery id or error on invalid form or auth
   // when response is received, route to delivery list with id
   generateDelivery(): StorageObjectData[] {
@@ -52,7 +52,8 @@ export class GenerateRegisterDeliveryComponent implements OnInit {
           materialCondition: MaterialCondition.UNSET,
           materialType: MaterialType.UNSET,
           notice: '',
-          organisationId: ''
+          organisationId: '',
+          deliveryId: '',
         };
     }
 

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { InternalDashboardComponent } from './internal-dashboard.component';
+import { HttpTableComponent } from './http-table.component';
 
-describe('InternalDashboardComponent', () => {
-  let component: InternalDashboardComponent;
-  let fixture: ComponentFixture<InternalDashboardComponent>;
+describe('HttpTableComponent', () => {
+  let component: HttpTableComponent;
+  let fixture: ComponentFixture<HttpTableComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InternalDashboardComponent ],
+      declarations: [ HttpTableComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(InternalDashboardComponent);
+    fixture = TestBed.createComponent(HttpTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

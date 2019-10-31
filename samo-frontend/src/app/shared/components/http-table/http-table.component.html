@@ -1,20 +1,3 @@
-<mat-form-field>
-  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filtrer tabell elementer">
-</mat-form-field>
-
-<section class="selection-section">
-  <mat-checkbox checked="true" value="nbId:0"             >NB id</mat-checkbox>
-  <mat-checkbox                value="organisationId:1"   >Organisasjonsid</mat-checkbox>
-  <mat-checkbox checked="true" value="externalId:2"       >Deres id</mat-checkbox>
-  <mat-checkbox checked="true" value="materialType:3"     >Materialtype</mat-checkbox>
-  <mat-checkbox checked="true" value="materialCondition:4">Tilstand</mat-checkbox>
-  <mat-checkbox checked="true" value="contractType:5"     >Kontraktvariant</mat-checkbox>
-  <mat-checkbox checked="true" value="collectionTitle:6"  >Sammlingstittel</mat-checkbox>
-  <mat-checkbox                value="notice:7"           >Avvik</mat-checkbox>
-  <mat-checkbox checked="true" value="containerId:8"      >Beholderid</mat-checkbox>
-</section>
-
-
 <div>
   <mat-progress-bar *ngIf="isLoadingResults" mode="query"></mat-progress-bar>
   <mat-progress-bar *ngIf="!isLoadingResults" value="100"></mat-progress-bar>
@@ -91,18 +74,7 @@
 
       <mat-header-row *matHeaderRowDef="displayColumns"></mat-header-row >
       <mat-row [className]="isLoadingResults ? 'table-element-loading' : 'table-element-idle'"
-           *matRowDef="let row; columns: displayColumns;" (click)="storageObjectSelected(row)"></mat-row>
+               *matRowDef="let row; columns: displayColumns;" (click)="storageObjectSelected(row)"></mat-row>
     </mat-table>
   </div>
-
-  <div fxLayout="column" fxLayoutAlign="center center" >
-    <mat-paginator fxFill fxLayoutAlign="center start" [pageSizeOptions]="[5, 10, 20, 40]" showFirstLastButtons></mat-paginator>
-    <button mat-raised-button class="mat-primary" (click)="registerNewStorageObject()">
-      Registrer nytt objekt
-      <mat-icon>arrow_drop_down</mat-icon>
-    </button>
-  </div>
-
 </div>
-
-

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import {StorageObjectData} from './models/storage-object-data';
 import {Observable, throwError} from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {environment} from "../../environments/environment";
 import {DeliveryData} from "./models/delivery-data";
-import {catchError, retry} from "rxjs/operators";
+import {catchError, retry, retryWhen} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -26,13 +26,27 @@ export class ObjectRetrieverService {
       );
   }
 
-  public updateDeliveryBatch(deliveryId: string, deliveryData: StorageObjectData) {
-    console.log('updateDeliveryBatch is not implemented');
-  }
-
   public getAllOrganisations(): Observable<string[]> {
     return this.http
       .get<string[]>(`${environment.backend}getAllOrganisationIds`)
+      .pipe(
+        retry(this.RETRY_ATTEMPTS),
+        catchError(this.handleError)
+      );
+  }
+
+  public registerObject(storageObject: StorageObjectData): Observable<string> {
+    return this.http
+      .post<string>(`${environment.backend}registerObject`, storageObject)
+      .pipe(
+        retry(this.RETRY_ATTEMPTS),
+        catchError(this.handleError)
+      );
+  }
+
+  public updateObject(from: StorageObjectData, to: StorageObjectData): Observable<string> {
+    return this.http
+      .post<string>(`${environment.backend}updateObject`, [from, to])
       .pipe(
         retry(this.RETRY_ATTEMPTS),
         catchError(this.handleError)
@@ -49,7 +63,6 @@ export class ObjectRetrieverService {
       // Get server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-    // TODO toast
     window.alert(errorMessage);
     return throwError(errorMessage);
   }

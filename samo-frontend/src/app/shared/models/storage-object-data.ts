@@ -15,4 +15,20 @@ export interface StorageObjectData {
   collectionTitle: string;
   notice: string;
   containerId: string;
+  deliveryId: string;
+}
+
+export function partialCreateStorageObjectData(prototype: StorageObjectData): StorageObjectData {
+  return {
+    nbId: '',
+    organisationId: prototype.organisationId,
+    externalId: '',
+    materialType: prototype.materialType,
+    materialCondition: prototype.materialCondition,
+    contractType: prototype.contractType,
+    collectionTitle: prototype.collectionTitle,
+    notice: '',
+    containerId: prototype.containerId,
+    deliveryId: prototype.deliveryId,
+  };
 }

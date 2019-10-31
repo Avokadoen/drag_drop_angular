@@ -1,16 +1,21 @@
-import {AfterViewInit, Component, OnInit, ViewChild, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, ViewChild, ViewChildren} from '@angular/core';
 import {MatCheckbox, MatCheckboxChange, MatDialog, MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
-import {StorageObjectData} from '../../shared/models/storage-object-data';
+import {partialCreateStorageObjectData, StorageObjectData} from '../../shared/models/storage-object-data';
 import {ObjectRetrieverService} from '../../shared/object-retriever.service';
 import {ControlFormComponent} from '../control-form/control-form.component';
-import {MaterialType} from '../../shared/models/material-type.enum';
-import {MaterialCondition} from '../../shared/models/material-condition.enum';
-import {ContractType} from '../../shared/models/contract-type.enum';
-import {ActivatedRoute, Params} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {catchError, map, startWith, switchMap} from "rxjs/operators";
+import {catchError, map, mergeMap, startWith, switchMap} from "rxjs/operators";
 import {merge, Observable} from "rxjs";
 import {PageEvent} from "@angular/material/paginator";
+import {BreakpointObserver} from "@angular/cdk/layout";
+
+/* sources:
+* mobile friendly table: https://stackblitz.com/edit/angular-mohmt5-y88uhq?file=app%2Ftable-basic-example.ts
+* */
+
+// TODO: @donts arrays sorting should be filtered with a pipe instead of functions
+// TODO: @donts breakpointObserver should be used in a interior class=
 
 @Component({
   selector: 'app-delivery-object-list',
@@ -24,12 +29,16 @@ export class DeliveryListComponent implements AfterViewInit {
     'contractType', 'collectionTitle', 'containerId'
   ];
 
-  displayedColumns: string[];
+  displayedSettingsColumns: string[];
+  displayColumns: string[];
+  isNarrow = false;
 
   @ViewChild(MatPaginator, {static: false})
   paginator: MatPaginator;
+
   @ViewChild(MatSort, {static: false})
   sort: MatSort;
+
   @ViewChildren(MatCheckbox)
   checkboxes: MatCheckbox[];
 
@@ -40,8 +49,16 @@ export class DeliveryListComponent implements AfterViewInit {
   constructor(private dialog: MatDialog,
               private objectRetrieverService: ObjectRetrieverService,
               private route: ActivatedRoute,
-              private snackBar: MatSnackBar) {
-    this.displayedColumns = this.masterColumnList;
+              private snackBar: MatSnackBar,
+              breakpointObserver: BreakpointObserver) {
+    this.displayedSettingsColumns = this.masterColumnList;
+
+    breakpointObserver.observe(['(max-width: 600px)']).subscribe(result => {
+      this.displayColumns = result.matches ?
+        ['nbId', 'materialType'] :
+        this.displayedSettingsColumns;
+      this.isNarrow = result.matches;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -63,9 +80,7 @@ export class DeliveryListComponent implements AfterViewInit {
         return this.objectRetrieverService.getDeliveryBatch(this.deliveryId, this.paginator.pageIndex, this.paginator.pageSize)
       }),
       map(data => {
-        this.isLoadingResults = false;
         this.paginator.length = data.objectCount;
-
         return data.storageObjects;
       }),
       catchError(() => {
@@ -78,6 +93,7 @@ export class DeliveryListComponent implements AfterViewInit {
         return new Observable<void>();
       })
     ).subscribe(data => {
+      this.isLoadingResults = false;
       if (data) {
         this.dataSource.data = data
       }
@@ -92,17 +108,23 @@ export class DeliveryListComponent implements AfterViewInit {
     }
   }
 
+  // TODO: this should maybe be moved to a ("pure") class?
   private updateDisplayColumns(event: MatCheckboxChange): void {
     const column = event.source.value.split(':')[0];
     const index = parseInt(event.source.value.split(':')[1], 10);
     if (event.checked) {
-      this.displayedColumns.splice(index, 0, column);
+      this.displayedSettingsColumns.splice(index, 0, column);
     } else {
-      this.displayedColumns = this.displayedColumns.filter(dc => dc !== column);
+      this.displayedSettingsColumns = this.displayedSettingsColumns.filter(dc => dc !== column);
+    }
+
+    if (!this.isNarrow) {
+      this.displayColumns = this.displayedSettingsColumns;
     }
   }
 
-  storageObjectSelected(incoming: StorageObjectData) {
+  // TODO: this should maybe be moved to a ("pure") class?
+  storageObjectSelected(refSO: StorageObjectData) {
     if (this.isLoadingResults) {
       return;
     }
@@ -110,33 +132,30 @@ export class DeliveryListComponent implements AfterViewInit {
     const dialogRef = this.dialog.open(ControlFormComponent, {
       width: '80vw',
       height: '80vh',
-      data: incoming,
+      data: refSO,
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (!result) {
-        return;
-      }
-      // TODO: change value through a service
-      const incomingIndex = this.dataSource.data.findIndex(o => o === incoming);
-      this.dataSource.data[incomingIndex] = result;
-      this.dataSource._updateChangeSubscription();
-    });
+    dialogRef.afterClosed().pipe(
+      mergeMap(newSO => {
+        if (!newSO || isEqual(newSO, refSO)) {
+          return new Observable<void>();
+        }
+        const refIndex = this.dataSource.data.findIndex(o => o === refSO);
+        const oldSO = this.dataSource.data[refIndex];
+        this.dataSource.data[refIndex] = newSO;
+        this.dataSource._updateChangeSubscription();
+        return this.objectRetrieverService.updateObject(oldSO, (<StorageObjectData>newSO));
+      })
+      ).subscribe(e => console.log(e));
   }
 
+  // TODO: this should maybe be moved to a ("pure") class?
   registerNewStorageObject(): void {
-    const newStorageObject: StorageObjectData = {
-      nbId: '',
-      organisationId: '',
-      externalId: '',
-      materialType: MaterialType.UNSET,
-      materialCondition: MaterialCondition.UNSET,
-      contractType: ContractType.UNSET,
-      collectionTitle: '',
-      notice: '',
-      containerId: '',
-    };
+    //  TODO: if length == 0
+    const refSO = this.dataSource.data[0];
+
+    const newStorageObject = partialCreateStorageObjectData(refSO);
 
     const dialogRef = this.dialog.open(ControlFormComponent, {
       width: '80vw',
@@ -145,13 +164,18 @@ export class DeliveryListComponent implements AfterViewInit {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (!result) {
-        return;
-      }
-      // TODO: change value through a service
-      this.dataSource.data.push(result);
-      this.dataSource._updateChangeSubscription();
+    dialogRef.afterClosed().pipe(
+      mergeMap(newSO => {
+        if (!(<StorageObjectData>newSO)) {
+          return new Observable<void>();
+        }
+        console.log(newSO);
+        return this.objectRetrieverService.registerObject((<StorageObjectData>newSO));
+      }),
+      catchError(err => err),
+    ).subscribe(result => {
+      console.log(result);
     });
   }
+
 }

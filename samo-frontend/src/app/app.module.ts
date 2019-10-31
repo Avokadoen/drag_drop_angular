@@ -13,8 +13,8 @@ import {
 } from '@angular/material';
 import { HeaderComponent } from './fixed-elements/header/header.component';
 import { ControlFormComponent } from './storage-object/control-form/control-form.component';
-import {ReactiveFormsModule} from '@angular/forms';
-import {ExtendedModule, FlexModule} from '@angular/flex-layout';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ExtendedModule, FlexLayoutModule, FlexModule} from '@angular/flex-layout';
 import { ObjectRootComponent } from './storage-object/object-root.component';
 import { DeliveryListComponent } from './storage-object/delivery-list/delivery-list.component';
 // tslint:disable-next-line:max-line-length
@@ -32,6 +32,9 @@ import {MatExpansionModule} from "@angular/material/expansion";
 import {MatListModule} from "@angular/material/list";
 import {MatSidenavModule} from "@angular/material/sidenav";
 import { ReactiveTestComponent } from './reactive-test/reactive-test.component';
+import {CommonModule} from "@angular/common";
+import { StringFilterPipe } from './shared/pipes/string-filter.pipe';
+import { HttpTableComponent } from './shared/components/http-table/http-table.component';
 
 const appRoutes: Routes = [
   { path: 'dashboard/:user', component: InternalDashboardComponent},
@@ -42,7 +45,50 @@ const appRoutes: Routes = [
   { path: '**', component: NotFoundPageComponent},
 ];
 
+const dependencies = [
+  BrowserModule,
+  HttpClientModule,
+  BrowserAnimationsModule,
+  MatToolbarModule,
+  MatFormFieldModule,
+  MatAutocompleteModule,
+  ReactiveFormsModule,
+  MatInputModule,
+  FlexModule,
+  MatSelectModule,
+  MatStepperModule,
+  MatButtonModule,
+  MatIconModule,
+  MatTableModule,
+  MatPaginatorModule,
+  MatSortModule,
+  MatDialogModule,
+  MatCardModule,
+  MatCheckboxModule,
+  RouterModule,
+  MatSnackBarModule,
+  MatProgressSpinnerModule,
+  MatProgressBarModule,
+  MatDividerModule,
+  MatExpansionModule,
+  MatListModule,
+  MatSidenavModule,
+  ExtendedModule,
+  FormsModule,
+  CommonModule,
+  FlexLayoutModule,
+];
+
 @NgModule({
+  entryComponents: [ControlFormComponent],
+  imports: [
+    dependencies,
+    RouterModule.forRoot(
+    appRoutes,
+    {enableTracing: false} // <-- debugging purposes only
+    ),
+  ],
+  exports: dependencies,
   declarations: [
     AppComponent,
     HeaderComponent,
@@ -53,41 +99,8 @@ const appRoutes: Routes = [
     NotFoundPageComponent,
     InternalDashboardComponent,
     ReactiveTestComponent,
-  ],
-  entryComponents: [ControlFormComponent],
-  imports: [
-    RouterModule.forRoot(
-      appRoutes,
-      {enableTracing: false} // <-- debugging purposes only
-    ),
-    BrowserModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatToolbarModule,
-    MatFormFieldModule,
-    MatAutocompleteModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    FlexModule,
-    MatSelectModule,
-    MatStepperModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatDialogModule,
-    MatCardModule,
-    MatCheckboxModule,
-    RouterModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
-    MatProgressBarModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatListModule,
-    MatSidenavModule,
-    ExtendedModule,
+    StringFilterPipe,
+    HttpTableComponent,
   ],
   providers: [ObjectRetrieverService],
   bootstrap: [AppComponent]

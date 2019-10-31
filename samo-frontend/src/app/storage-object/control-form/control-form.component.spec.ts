@@ -1,14 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ControlFormComponent } from './control-form.component';
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
-describe('ObjectRegisterFormComponent', () => {
+describe('ControlFormComponent', () => {
   let component: ControlFormComponent;
   let fixture: ComponentFixture<ControlFormComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ControlFormComponent ]
+      declarations: [ ControlFormComponent ],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     })
     .compileComponents();
   }));

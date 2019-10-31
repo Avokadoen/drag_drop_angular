@@ -17,7 +17,7 @@ table {
 }
 
 mat-drawer {
-  max-width: 40vw;
+  max-width: 1000px;
 }
 
 .unfold-more {
@@ -25,5 +25,7 @@ mat-drawer {
 }
 
 .delivery-icon {
-  margin: 20px 0;
+  margin-top: 19px;
+  margin-bottom: 1em;
+  margin-left: 10px;
 }

@@ -15,8 +15,7 @@
     <div class="max-height" fxLayout="column">
       <div fxLayout="row">
         <h3>Oversikt for alle leveranser</h3>
-        <div fxFlex="10px"></div>
-        <mat-icon>local_shipping</mat-icon>
+        <mat-icon class="delivery-icon">local_shipping</mat-icon>
       </div>
       <mat-divider></mat-divider>
       <div class="max-height mat-elevation-z8">
@@ -24,7 +23,7 @@
           <input type="text" placeholder="Organisasjonsid" aria-label="Organisasjonsid" matInput
                  [formControl]="organisationFormControl" [matAutocomplete]="auto">
           <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
-            <mat-option *ngFor="let option of filteredOrgIds | async" [value]="option">
+            <mat-option *ngFor="let option of (organisationIds | stringFilter: organisationFormControl.value)" [value]="option">
               {{option}}
             </mat-option>
           </mat-autocomplete>
@@ -50,4 +49,3 @@
     </div>
   </mat-drawer-content>
 </mat-drawer-container>
-

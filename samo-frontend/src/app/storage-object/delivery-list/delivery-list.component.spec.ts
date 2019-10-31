@@ -1,14 +1,15 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeliveryListComponent } from './delivery-list.component';
+import {AppModule} from "../../app.module";
 
-describe('DeliveryObjectListComponent', () => {
+describe('Component: DeliveryListComponent', () => {
   let component: DeliveryListComponent;
   let fixture: ComponentFixture<DeliveryListComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DeliveryListComponent ]
+      declarations: [ DeliveryListComponent, AppModule],
     })
     .compileComponents();
   }));
