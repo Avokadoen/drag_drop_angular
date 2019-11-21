@@ -3,78 +3,20 @@
   <mat-progress-bar *ngIf="!isLoadingResults" value="100"></mat-progress-bar>
   <div class="table-container mat-elevation-z8">
     <mat-table [dataSource]="dataSource" matSort>
-      <!-- TODO: this could be created with *ngFor, it might result in too much logic for html -->
-      <ng-container matColumnDef="nbId">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Strekkode objekt</mat-header-cell>
-        <mat-cell *matCellDef="let element">
+      <!-- TODO: this field access violates typescript standards -->
+      <ng-container *ngFor="let element of displayColumns" matColumnDef="row">
+        <mat-header-cell *matHeaderCellDef  mat-sort-header>el</mat-header-cell>
+        <mat-cell *matCellDef="let elementCell">
           <span class="mobile-label">Srekkode:</span>
-          {{element.nbId}}
+          {{elementCell.nbId}}
         </mat-cell>
       </ng-container>
 
-      <ng-container matColumnDef="organisationId">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Organisasjonsid </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Organisasjonsid:</span>
-          {{element.organisationId}}
-        </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="externalId">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Avleverers referanse </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Avleverers referanse:</span>
-          {{element.externalId}}
-        </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="materialType">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Materialtype </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Materialtype:</span>
-          {{element.materialType}}
-        </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="materialCondition">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Tilstand </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Tilstand:</span>
-          {{element.materialCondition}}
-        </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="contractType">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Kontraktvariant </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Kontraktvariant:</span>
-          {{element.contractType}} </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="collectionTitle">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Sammlingstittel </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Sammlingstittel:</span>
-          {{element.collectionTitle}} </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="notice">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Avvik </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Avvik:</span>
-          {{element.notice}} </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="containerId">
-        <mat-header-cell *matHeaderCellDef  mat-sort-header> Strekkode beholder </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <span class="mobile-label">Strekkode beholder:</span>
-          {{element.containerId}} </mat-cell>
-      </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayColumns"></mat-header-row >
+      <!-- TODO: directive here for ngClass -->
       <mat-row [className]="isLoadingResults ? 'table-element-loading' : 'table-element-idle'"
-               *matRowDef="let row; columns: displayColumns;" (click)="storageObjectSelected(row)"></mat-row>
+               *matRowDef="let row; columns: displayColumns" (click)="onElementSelected.emit(row)"></mat-row>
     </mat-table>
   </div>
 </div>

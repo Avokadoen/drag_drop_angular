@@ -1,7 +1,7 @@
 // modified version of 'isEquivalent' in http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html
 
 // TODO: check cases not handled (mentioned in article) to increase robustness
-function isEqual(a, b) {
+export function isEqual(a, b) {
   // Create arrays of property names
   const aProps = Object.getOwnPropertyNames(a);
   const bProps = Object.getOwnPropertyNames(b);

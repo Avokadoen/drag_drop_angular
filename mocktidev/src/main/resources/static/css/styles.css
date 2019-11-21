@@ -1,0 +1,28 @@
+h4 {
+    color: red;
+}
+
+.error-message {
+    color: red;
+}
+
+.row-element {
+    display:inline-block;
+}
+
+.pad-left {
+    padding-left: 20px;
+}
+
+.table-wrapper {
+    margin-left: 20px;
+    width: calc(100vw - 40px);
+    overflow: auto;
+    display:inline-block;
+}
+
+
+
+.page-link-selected {
+    filter: invert(0.1);
+}

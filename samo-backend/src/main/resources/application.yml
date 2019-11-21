@@ -2,4 +2,5 @@ Samo:
   testObjectCount: 10000
 
 server:
-  address: 158.39.123.108
+  port: 8082
+  address: akselhj.nb.no

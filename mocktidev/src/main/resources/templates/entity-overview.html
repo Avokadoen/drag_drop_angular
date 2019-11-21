@@ -1,0 +1,163 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <title>Show entity</title>
+        <meta charset="UTF-8">
+        <link href = "css/styles.css" rel = "stylesheet"/>
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+        <script type="text/javascript" src="bootstrap/js/jquery.min.js" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="bootstrap/js/popper.min.js" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="/">MOCKTIDEV</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/entity_overview">Entity overview</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <h1>Entity overview</h1>
+        <div th:if="${errorMsg != ''}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMsg}">none</span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <button style="margin-left: 20px" type="button" class="btn btn-success" data-toggle="modal" data-target="#newEntityModal">
+            Create a new entity
+        </button>
+        <div style="height: 30px"></div>
+        <div>
+            <div class="row-element pad-left">
+                <p>Page sizing</p>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li class="page-item"
+                            th:each="pageSize : ${pageSizes}">
+                            <a th:href="@{/entity_overview_paginate(size=${pageSize}, page=0, barcodeQuery=${barcodeQuery})}"
+                               th:text="${pageSize}"
+                               th:class="${entities.size} == ${pageSize} ? 'page-link page-link-selected' : 'page-link'"></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="row-element pad-left">
+                <form action="/entity_overview_search">
+                    <div class="form-group row-element">
+                        <small id="entityQueryHelp" class="form-text text-muted">Will find the entity with the given barcode and all children</small>
+                        <label for="entityQuery">Parent barcode</label>
+                        <input id="entityQuery" type="text" placeholder="Search for a barcode" aria-describedby="entityQueryHelp" name="barcodeQuery" th:value="${barcodeQuery}"/>
+                    </div>
+                    <input class="btn btn-primary row-element" type="submit" value="Submit"/>
+                </form>
+            </div>
+            <div class="table-wrapper">
+                <table id="entityTable" class="table table-striped table-bordered">
+                    <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Outer id</th>
+                        <th scope="col">Object barcode</th>
+                        <th scope="col">Box barcode</th>
+                        <th scope="col">Crate barcode</th>
+                        <th scope="col">Pallet barcode</th>
+                        <th scope="col">Location barcode</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${entities.isEmpty()}">
+                        <td colspan="2"> No entities Available </td>
+                    </tr>
+                    <tr th:each="entity : ${entities}" class="overflow-auto">
+                        <th scope="row" th:text="${entity.outerId}"></th>
+                        <td th:text="${entity.objectBarcode}"></td>
+                        <td th:text="${entity.boxBarcode}"></td>
+                        <td th:text="${entity.crateBarcode}"></td>
+                        <td th:text="${entity.palletBarcode}"></td>
+                        <td th:text="${entity.locationBarcode}"></td>
+                        <td>
+                            <form method="post" th:action="@{/entity_delete}" class="row-element">
+                                <input hidden type="number" name="entityId" required="required" th:value="${entity.outerId}">
+                                <input hidden type="text" name="newParentBarcode" required="required" value="null">
+                                <input hidden type="text" placeholder="Search for a barcode" aria-describedby="entityQueryHelp" name="barcodeQuery" th:value="${barcodeQuery}"/>
+                                <input style="overflow: hidden" class="btn btn-danger" type="submit" value="Delete entity">
+                            </form>
+                            <form method="post" th:action="@{/entity_new_parent}" class="row-element">
+                                <input hidden type="number" name="entityId" required="required" placeholder="Entity barcode" th:value="${entity.outerId}">
+                                <input type="text" name="newParentBarcode" required="required" placeholder="Parent barcode"> <!-- TODO: dropdown -->
+                                <input hidden type="text" placeholder="Search for a barcode" aria-describedby="entityQueryHelp" name="barcodeQuery" th:value="${barcodeQuery}"/>
+                                <input class="btn btn-secondary" type="submit" value="Update parent">
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-left: 20px">
+                <nav class="nav" aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li class="page-item"
+                            th:each="pageNumber : ${pageNumbers}">
+                            <a
+                                    th:href="@{/entity_overview_paginate(size=${entities.size}, page=${pageNumber} - 1, barcodeQuery=${barcodeQuery})}"
+                                    th:text="${pageNumber}"
+                                    th:class="${entities.number} + 1 == ${pageNumber} ? 'page-link active page-link-selected' : 'page-link'"></a>
+                        </li>
+                    </ul>
+                </nav>
+                <p>Page number</p>
+            </div>
+        </div>
+        <!-- new entity modal -->
+        <div class="modal fade" id="newEntityModal" tabindex="-1" role="dialog" aria-labelledby="newEntityModal" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="newEntityModalLabel">Add new entity</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form th:action="@{/entity_create}" method="post">
+                            <div class="form-group">
+                                <label for="newEntityBarcode">Barcode</label>
+                                <input id="newEntityBarcode" required="required" type="text" placeholder="Enter barcode" name="entityBarcode"/>
+                            </div>
+                            <div class="form-group">
+                                <label for="newEntityParentBarc">Parent barcode</label>
+                                <input id="newEntityParentBarc" type="text" placeholder="Enter parent barcode" aria-describedby="newEntityParentBarcHelp" name="parentBarcode"/>
+                                <small id="newEntityParentBarcHelp" class="form-text text-muted">The barcode of the parent entity, can be empty in some cases</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="entityTypeSelect">Select the entity type</label>
+                                <select class="form-control" id="entityTypeSelect" name="entityType" required="required">
+                                    <option value="OBJECT">OBJECT</option>
+                                    <option value="BOX">BOX</option>
+                                    <option value="CRATE">CRATE</option>
+                                    <option value="PALLET">PALLET</option>
+                                    <option value="LOCATION">LOCATION</option>
+                                </select>
+                            </div>
+                            <input hidden type="text" placeholder="Search for a barcode" aria-describedby="entityQueryHelp" name="barcodeQuery" th:value="${barcodeQuery}"/>
+                            <div class="btn-group">
+                                <input class="btn btn-primary" type="submit" value="Submit"/>
+                                <input class="btn btn-warning" type="reset" value="Reset"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

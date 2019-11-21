@@ -1,0 +1,14 @@
+# The SQL dialect makes Hibernate generate better SQL for the chosen database
+spring.jpa.properties.hibernate.dialect: no.nb.samo.mocktidev.util.MySQL5UTF8Dialect
+
+# Hibernate ddl auto (create, create-drop, validate, update)
+spring.jpa.hibernate.ddl-auto: validate
+
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mocktidev?useUnicode=true&autoReconnect=true&allowMultiQueries=true&useSSL=false
+    username: root
+    password: root
+
+server.host: akselhj@nb.no

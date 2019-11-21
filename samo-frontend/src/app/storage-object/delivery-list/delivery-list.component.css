@@ -17,19 +17,6 @@ table {
   overflow: auto;
 }
 
-.table-element-idle:hover {
-  filter: drop-shadow(0px 0px 12px rgb(50%, 50%, 50%));
-}
-
-.table-element-loading {
-  background-color: #d3d3d3;
-}
-
-.table-element-idle {
-  background: inherit;
-}
-
-
 .table-container {
   max-height: calc(100vh - 250px);
   overflow: scroll;

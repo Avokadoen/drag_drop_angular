@@ -9,6 +9,7 @@ import {catchError, map, mergeMap, startWith, switchMap} from "rxjs/operators";
 import {merge, Observable} from "rxjs";
 import {PageEvent} from "@angular/material/paginator";
 import {BreakpointObserver} from "@angular/cdk/layout";
+import {isEqual} from "../../shared/functions/equality";
 
 /* sources:
 * mobile friendly table: https://stackblitz.com/edit/angular-mohmt5-y88uhq?file=app%2Ftable-basic-example.ts
@@ -61,6 +62,7 @@ export class DeliveryListComponent implements AfterViewInit {
     });
   }
 
+
   ngAfterViewInit(): void {
     this.route.params.subscribe(params => {
       this.deliveryId = params.id;
@@ -71,7 +73,7 @@ export class DeliveryListComponent implements AfterViewInit {
     merge(... checkBoxEvents).subscribe(change  => {
       this.updateDisplayColumns(change)
     });
-
+    // TODO: backend sort
     // this.dataSource.sort = this.sort;
     this.paginator.page.pipe(
       startWith({}),
@@ -108,7 +110,7 @@ export class DeliveryListComponent implements AfterViewInit {
     }
   }
 
-  // TODO: this should maybe be moved to a ("pure") class?
+  // TODO: remove this functionality
   private updateDisplayColumns(event: MatCheckboxChange): void {
     const column = event.source.value.split(':')[0];
     const index = parseInt(event.source.value.split(':')[1], 10);

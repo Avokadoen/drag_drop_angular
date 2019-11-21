@@ -35,11 +35,22 @@ import { ReactiveTestComponent } from './reactive-test/reactive-test.component';
 import {CommonModule} from "@angular/common";
 import { StringFilterPipe } from './shared/pipes/string-filter.pipe';
 import { HttpTableComponent } from './shared/components/http-table/http-table.component';
+import { SelectTableRowArrayPipe } from './shared/pipes/select-table-row-array.pipe';
+import { FillHeightDirective } from './shared/directories/fill-height.directive';
+import { HoverFocusDirective } from './shared/directories/hover-focus.directive';
+import { LoadingIndicatorDirective } from './shared/directories/loading-indicator.directive';
+import { H3IconAlignDirective } from './shared/directories/h3-icon-align.directive';
+import { ScrollRotateDirective } from './shared/directories/scroll-rotate.directive';
+import { DragDropRootComponent } from './drag-drop-demo/drag-drop-root/drag-drop-root.component';
+import {DragDropModule} from "@angular/cdk/drag-drop";
+import { RemoveSelfPipe } from './drag-drop-demo/remove-self.pipe';
+import { StorageEntityDraggableComponent } from './drag-drop-demo/storage-entity-draggable/storage-entity-draggable .component';
 
 const appRoutes: Routes = [
   { path: 'dashboard/:user', component: InternalDashboardComponent},
   { path: 'delivery-list/:id', component: DeliveryListComponent},
   { path: 'generate-register', component: GenerateRegisterDeliveryComponent},
+  { path: 'drag-drop', component: DragDropRootComponent},
   { path: 'test', component: ReactiveTestComponent},
   { path: '', pathMatch: 'full', component: ObjectRootComponent},
   { path: '**', component: NotFoundPageComponent},
@@ -84,11 +95,14 @@ const dependencies = [
   imports: [
     dependencies,
     RouterModule.forRoot(
-    appRoutes,
-    {enableTracing: false} // <-- debugging purposes only
+      appRoutes,
+      {enableTracing: false} // <-- debugging purposes only
     ),
+    DragDropModule,
   ],
-  exports: dependencies,
+  exports: [
+    dependencies,
+  ],
   declarations: [
     AppComponent,
     HeaderComponent,
@@ -101,6 +115,15 @@ const dependencies = [
     ReactiveTestComponent,
     StringFilterPipe,
     HttpTableComponent,
+    SelectTableRowArrayPipe,
+    FillHeightDirective,
+    HoverFocusDirective,
+    LoadingIndicatorDirective,
+    H3IconAlignDirective,
+    ScrollRotateDirective,
+    DragDropRootComponent,
+    RemoveSelfPipe,
+    StorageEntityDraggableComponent,
   ],
   providers: [ObjectRetrieverService],
   bootstrap: [AppComponent]

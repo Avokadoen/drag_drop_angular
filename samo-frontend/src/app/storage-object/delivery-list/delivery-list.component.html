@@ -2,7 +2,7 @@
   <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filtrer tabell elementer">
 </mat-form-field>
 
-<section class="selection-section">
+<section class="selection-section" fxHide fxShow.gt-xs>
   <mat-checkbox checked="true" value="nbId:0"             >NB id</mat-checkbox>
   <mat-checkbox                value="organisationId:1"   >Organisasjonsid</mat-checkbox>
   <mat-checkbox checked="true" value="externalId:2"       >Deres id</mat-checkbox>
@@ -90,7 +90,7 @@
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayColumns"></mat-header-row >
-      <mat-row [className]="isLoadingResults ? 'table-element-loading' : 'table-element-idle'"
+      <mat-row [appLoadingIndicator]="isLoadingResults" appHoverFocus
            *matRowDef="let row; columns: displayColumns;" (click)="storageObjectSelected(row)"></mat-row>
     </mat-table>
   </div>

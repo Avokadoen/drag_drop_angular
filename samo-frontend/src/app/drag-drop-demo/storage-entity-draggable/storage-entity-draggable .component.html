@@ -1,0 +1,41 @@
+<div cdkDropList
+     class="entity-drag-list"
+     [ngStyle]="{'background-color': this.backgroundColor}"
+     [id]="parentEntityId"
+     [cdkDropListData]="parentEntity"
+     [cdkDropListConnectedTo]="storageNode.barcode| removeSelf: allNonObjectBarcodes"
+     (cdkDropListDropped)="onDragDrop($event)">
+  <div cdkDrag
+       [id]="storageNode.barcode"
+       [cdkDragData]="storageNode"
+       [cdkDragDisabled]="dragDisabled">
+    <div title="Drag this entity and its children"
+         class="entity-drag-handle"
+         cdkDragHandle>
+      {{storageNode.barcode}}
+      <mat-icon *ngIf="!dragDisabled">
+        drag_indicator
+      </mat-icon>
+    </div>
+    <div class="entity-drag-preview"
+         *cdkDragPreview>
+      {{storageNode.barcode}} with {{getChildCount}} child item(s)
+    </div>
+  </div>
+  <ul *ngIf="!isObjectType"
+      cdkDropList
+      class="entity-drop-zone"
+      [id]="storageNode.barcode"
+      [cdkDropListConnectedTo]="storageNode.barcode | removeSelf: allNonObjectBarcodes"
+      [cdkDropListData]="storageNode"
+      (cdkDropListDropped)="onDragDrop($event)">
+    <li *ngFor="let child of storageNode.children">
+      <app-storage-entity-draggable
+        [storageNode]="child"
+        [parentEntity]="storageNode"
+        [allNonObjectBarcodes]="allNonObjectBarcodes"
+        (entityDrop)="onDragDrop($event)">
+      </app-storage-entity-draggable>
+    </li>
+  </ul>
+</div>

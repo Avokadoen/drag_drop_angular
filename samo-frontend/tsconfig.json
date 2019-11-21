@@ -21,6 +21,8 @@
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
+    "strictInjectionParameters": true,
+    // TODO: remove this if/when all our angular modules support typescript 3.7
+    "disableTypeScriptVersionCheck": true
   }
 }

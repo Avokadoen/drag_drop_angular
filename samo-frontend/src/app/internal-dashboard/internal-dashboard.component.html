@@ -4,21 +4,21 @@
     <mat-icon class="unfold-more">unfold_more</mat-icon>
   </button>
 </mat-toolbar>
-<mat-drawer-container class="max-height">
-  <mat-drawer  mode="over"  opened>
+<mat-drawer-container appFillHeight="128px">
+  <mat-drawer mode="over" opened>
     <h3>Velkommen {{user}}</h3>
     <mat-divider></mat-divider>
     <p class="profile-info">informasjon og kontroll av personlig bruker evt organisasjon</p>
     <p class="profile-info">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
   </mat-drawer>
   <mat-drawer-content>
-    <div class="max-height" fxLayout="column">
+    <div fxLayout="column">
       <div fxLayout="row">
         <h3>Oversikt for alle leveranser</h3>
-        <mat-icon class="delivery-icon">local_shipping</mat-icon>
+        <mat-icon appH3IconAlign appScrollRotate>local_shipping</mat-icon>
       </div>
       <mat-divider></mat-divider>
-      <div class="max-height mat-elevation-z8">
+      <div class="mat-elevation-z8">
         <mat-form-field>
           <input type="text" placeholder="Organisasjonsid" aria-label="Organisasjonsid" matInput
                  [formControl]="organisationFormControl" [matAutocomplete]="auto">
@@ -43,7 +43,7 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; columns: tableColumns;" class="table-element-idle" (click)="routeToDelivery(row['deliveryId'])"></tr>
+          <tr mat-row *matRowDef="let row; columns: tableColumns;" appHoverFocus (click)="routeToDelivery(row['deliveryId'])"></tr>
         </table>
       </div>
     </div>
