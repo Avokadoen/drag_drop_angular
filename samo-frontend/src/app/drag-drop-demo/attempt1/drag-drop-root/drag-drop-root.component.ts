@@ -1,7 +1,13 @@
 import {Component, OnChanges} from '@angular/core';
-import {StorageEntity} from "../model/storage-entity";
-import {EntityType} from "../model/entity-type.enum";
-import {CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray} from "@angular/cdk/drag-drop";
+import {StorageEntity} from "../../model/storage-entity";
+import {EntityType} from "../../model/entity-type.enum";
+import {
+  CdkDragDrop,
+  CdkDragEnter,
+  CdkDragExit,
+  CdkDragMove,
+} from "@angular/cdk/drag-drop";
+import {ScreenPosition} from "../../model/screen-position";
 
 @Component({
   selector: 'app-drag-drop-root',
@@ -22,14 +28,17 @@ export class DragDropRootComponent implements OnChanges {
               barcode: 'object1',
               children: [],
               entityType: EntityType.OBJECT,
+              elementRefCache: null,
             },
             {
               barcode: 'object2',
               children: [],
               entityType: EntityType.OBJECT,
+              elementRefCache: null,
             }
           ],
           entityType: EntityType.PALLET,
+          elementRefCache: null,
         },
         {
           barcode: 'pallet2',
@@ -41,6 +50,7 @@ export class DragDropRootComponent implements OnChanges {
                   barcode: 'object3',
                   children: [],
                   entityType: EntityType.OBJECT,
+                  elementRefCache: null,
                 },
                 {
                   barcode: 'box1',
@@ -49,27 +59,38 @@ export class DragDropRootComponent implements OnChanges {
                       barcode: 'object6',
                       children: [],
                       entityType: EntityType.OBJECT,
+                      elementRefCache: null,
                     },
                   ],
                   entityType: EntityType.BOX,
+                  elementRefCache: null,
                 }],
               entityType: EntityType.CRATE,
+              elementRefCache: null,
             }],
-          entityType: EntityType.PALLET
+          entityType: EntityType.PALLET,
+          elementRefCache: null,
         },
         {
           barcode: 'object5',
           children: [],
           entityType: EntityType.OBJECT,
+          elementRefCache: null,
         },
         {
           barcode: 'object4',
           children: [],
           entityType: EntityType.OBJECT,
+          elementRefCache: null,
         }
       ],
-      entityType: EntityType.LOCATION
+      entityType: EntityType.LOCATION,
+      elementRefCache: null,
     };
+
+  // TODO: refactor this nasty hack
+  //      - as of now we take a drag move and store it, as user drop we use move to find the new index of the entity in parent
+  currentEntityEvent: CdkDragMove<StorageEntity>;
 
   public get allNonObjectBarcodes(): string[] {
     // We reverse ids here to respect items nesting hierarchy
@@ -83,19 +104,34 @@ export class DragDropRootComponent implements OnChanges {
     // TODO: update accept new objects from service
   }
 
+  public onDragMove(event: CdkDragMove<StorageEntity>) {
+    this.currentEntityEvent = event;
+  }
+
   public onDragDrop(event: CdkDragDrop<StorageEntity>) {
-    // TODO: sort on drop, validate relation
+    const movedEntity: StorageEntity = event.item.data;
+    // TODO: replace event with dom cursor position?
+    const newIndex = this.calculateNewIndex(this.currentEntityEvent.pointerPosition, movedEntity.barcode, event.container.data.children);
     if (this.canBeDropped(event)) {
-      const movingEntity: StorageEntity = event.item.data;
-      event.container.data.children.push(movingEntity);
-      event.previousContainer.data.children = event.previousContainer.data.children.filter((child) => child.barcode !== movingEntity.barcode);
-    } else {
-      moveItemInArray(
-        event.container.data.children,
-        event.previousIndex,
-        event.currentIndex
-      );
+      event.previousContainer.data.children = event.previousContainer.data.children.filter((child) => child.barcode !== movedEntity.barcode);
+      event.container.data.children.splice(newIndex, 0, movedEntity);
     }
+    this.currentEntityEvent = null;
+  }
+
+  private calculateNewIndex(releasedPosition: ScreenPosition, releasedEntity: string, newSiblings: StorageEntity[]): number {
+    let index = 0;
+    for (const sibling of newSiblings) {
+      if (sibling.barcode === releasedEntity) {
+        continue;
+      }
+      const siblingRect = sibling.elementRefCache.nativeElement.getBoundingClientRect();
+      if (siblingRect.top > releasedPosition.y) {
+        return index;
+      }
+      index++;
+    }
+    return index;
   }
 
   private getBarcodesRecursive(storageEntity: StorageEntity): string[] {
@@ -108,9 +144,7 @@ export class DragDropRootComponent implements OnChanges {
     const movingItem: StorageEntity = event.item.data;
 
     return movingItem.entityType < event.container.data.entityType
-      && event.previousContainer.id !== event.container.id
       && this.isNotSelfDrop(event)
-      && !this.hasChild(movingItem, event.container.data);
   }
 
   private isNotSelfDrop(event: CdkDragDrop<StorageEntity> | CdkDragEnter<StorageEntity> | CdkDragExit<StorageEntity>): boolean {

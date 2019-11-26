@@ -1,22 +1,34 @@
-import {AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
-import {CdkDragDrop} from "@angular/cdk/drag-drop";
-import {StorageEntity} from "../model/storage-entity";
-import {EntityType} from "../model/entity-type.enum";
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter, Inject,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
+import {CdkDragDrop, CdkDragMove, CdkDragStart} from "@angular/cdk/drag-drop";
+import {StorageEntity} from "../../../model/storage-entity";
+import {EntityType} from "../../../model/entity-type.enum";
+import {DOCUMENT} from "@angular/common";
 
 // Sources: code is heavily based on Ilya Pakhomov's code that can be found here:
 // https://stackblitz.com/edit/angular-cdk-nested-drag-drop-demo
 @Component({
   selector: 'app-storage-entity-draggable',
-  templateUrl: './storage-entity-draggable .component.html',
-  styleUrls: ['./storage-entity-draggable .component.scss']
+  templateUrl: './storage-entity-draggable.component.html',
+  styleUrls: ['./storage-entity-draggable.component.scss']
 })
-export class StorageEntityDraggableComponent implements OnChanges, OnInit {
+export class StorageEntityDraggableComponent implements OnChanges, OnInit, AfterViewInit {
 
   @Input() parentEntity?: StorageEntity;
   @Input() storageNode: StorageEntity;
   @Input() allNonObjectBarcodes: string[];
 
-
+  @Output() entityMove: EventEmitter<CdkDragMove<StorageEntity>>;
+  @Output() entityDrop: EventEmitter<CdkDragDrop<StorageEntity>>;
 
   public get dragDisabled(): boolean {
     return !this.parentEntity;
@@ -37,10 +49,10 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit {
   backgroundColor: string;
 
 
-  @Output() entityDrop: EventEmitter<CdkDragDrop<StorageEntity>>;
 
   constructor() {
     this.entityDrop = new EventEmitter<CdkDragDrop<StorageEntity>>();
+    this.entityMove = new EventEmitter<CdkDragMove<StorageEntity>>();
   }
 
   ngOnInit(): void {
@@ -65,9 +77,22 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit {
 
   ngOnChanges() {
     // update table
+
+    // fetch new reference as old one is invalid
+    this.storageNode.elementRefCache = new ElementRef(document.getElementById(this.storageNode.barcode));
   }
 
-  public onDragDrop(event: CdkDragDrop<StorageEntity, StorageEntity>): void {
+  ngAfterViewInit(): void {
+    // we set all children  because of bindings between components
+    this.storageNode.elementRefCache = this.storageNode.elementRefCache ?? new ElementRef(document.getElementById(this.storageNode.barcode));
+  }
+
+  public onDragDrop(event: CdkDragDrop<StorageEntity>): void {
     this.entityDrop.emit(event);
   }
+
+  public onDragMove(event: CdkDragMove<StorageEntity>): void {
+    this.entityMove.emit(event);
+  }
+
 }
