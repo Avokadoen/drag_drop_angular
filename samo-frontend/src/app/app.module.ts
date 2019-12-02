@@ -41,16 +41,18 @@ import { HoverFocusDirective } from './shared/directories/hover-focus.directive'
 import { LoadingIndicatorDirective } from './shared/directories/loading-indicator.directive';
 import { H3IconAlignDirective } from './shared/directories/h3-icon-align.directive';
 import { ScrollRotateDirective } from './shared/directories/scroll-rotate.directive';
-import { DragDropRootComponent } from './drag-drop-demo/drag-drop-root/drag-drop-root.component';
+import { DragDropRootComponent } from './drag-drop-demo/attempt1/drag-drop-root/drag-drop-root.component';
 import {DragDropModule} from "@angular/cdk/drag-drop";
 import { RemoveSelfPipe } from './drag-drop-demo/remove-self.pipe';
-import { StorageEntityDraggableComponent } from './drag-drop-demo/storage-entity-draggable/storage-entity-draggable .component';
+import {StorageEntityDraggableComponent} from "./drag-drop-demo/attempt1/drag-drop-root/storage-entity-draggable/storage-entity-draggable.component";
+import {NewStorageEntityComponent} from "./drag-drop-demo/attempt1/drag-drop-root/new-storage-entity/new-storage-entity.component";
+import {WebSocketService} from "./drag-drop-demo/web-socket/web-socket.service";
 
 const appRoutes: Routes = [
   { path: 'dashboard/:user', component: InternalDashboardComponent},
   { path: 'delivery-list/:id', component: DeliveryListComponent},
   { path: 'generate-register', component: GenerateRegisterDeliveryComponent},
-  { path: 'drag-drop', component: DragDropRootComponent},
+  { path: 'drag-drop-demo', component: DragDropRootComponent},
   { path: 'test', component: ReactiveTestComponent},
   { path: '', pathMatch: 'full', component: ObjectRootComponent},
   { path: '**', component: NotFoundPageComponent},
@@ -91,7 +93,7 @@ const dependencies = [
 ];
 
 @NgModule({
-  entryComponents: [ControlFormComponent],
+  entryComponents: [ControlFormComponent, NewStorageEntityComponent],
   imports: [
     dependencies,
     RouterModule.forRoot(
@@ -124,8 +126,10 @@ const dependencies = [
     DragDropRootComponent,
     RemoveSelfPipe,
     StorageEntityDraggableComponent,
+    StorageEntityDraggableComponent,
+    NewStorageEntityComponent,
   ],
-  providers: [ObjectRetrieverService],
+  providers: [ObjectRetrieverService, WebSocketService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

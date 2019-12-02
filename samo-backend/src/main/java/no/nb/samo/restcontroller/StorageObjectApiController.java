@@ -42,8 +42,6 @@ public class StorageObjectApiController {
             so = generateNewTestDelivery(deliveryId);
         }
 
-        Thread.sleep(200); // TODO: remove line
-
         int fromIndex = Math.min(pageNumber * pageSize, so.size());
         int toIndex = Math.min(fromIndex + pageSize, so.size());
         return new Delivery(deliveryId, so.size(), so.subList(fromIndex, toIndex));

@@ -125,7 +125,6 @@ export class DeliveryListComponent implements AfterViewInit {
     }
   }
 
-  // TODO: this should maybe be moved to a ("pure") class?
   storageObjectSelected(refSO: StorageObjectData) {
     if (this.isLoadingResults) {
       return;
@@ -152,7 +151,6 @@ export class DeliveryListComponent implements AfterViewInit {
       ).subscribe(e => console.log(e));
   }
 
-  // TODO: this should maybe be moved to a ("pure") class?
   registerNewStorageObject(): void {
     //  TODO: if length == 0
     const refSO = this.dataSource.data[0];

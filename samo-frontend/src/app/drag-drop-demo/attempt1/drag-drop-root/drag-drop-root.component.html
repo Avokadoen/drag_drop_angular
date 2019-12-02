@@ -1,4 +1,34 @@
-<div>
-  <app-storage-entity-draggable [storageNode]="storageEntities" [allNonObjectBarcodes]="allNonObjectBarcodes" (entityDrop)="onDragDrop($event)" (entityMove)="onDragMove($event)"></app-storage-entity-draggable>
-</div>
 
+<mat-drawer-container>
+  <mat-drawer #drawer mode="side" opened>
+    <!-- TODO: sett move event to null in another more robust one-time way"-->
+    <app-storage-entity-draggable class="action-segment"
+                                  [storageNode]="DELETE_NODE"
+                                  [allPossibleEntityRelations]="getSimplifiedTree"
+                                  [dropBehaviourData]="DROP_DELETE_DATA"
+                                  [overwriteNodeColor]="'rgb(243, 115, 111, opacity)'"
+                                  [depth]="0"
+                                  (entityMove)="onDragMove(null)"
+                                  (entityDrop)="onDragDrop($event)">
+    </app-storage-entity-draggable>
+    <button class="mat-primary" mat-flat-button (click)="onNewEntityClicked()">Add entity</button>
+  </mat-drawer>
+
+  <div class="example-sidenav-content">
+    <button class="mat-primary" mat-button
+            (click)="drawer.toggle()"
+            (mouseover)="onMouseOverToggleNav()">
+      Toggle sidenav
+    </button>
+  </div>
+  <div>
+    <app-storage-entity-draggable
+      [storageNode]="storageRoot"
+      [allPossibleEntityRelations]="getSimplifiedTree"
+      [dropBehaviourData]="DROP_MOVE_DATA"
+      [depth]="0"
+      (entityDrop)="onDragDrop($event)"
+      (entityMove)="onDragMove($event)">
+    </app-storage-entity-draggable>
+  </div>
+</mat-drawer-container>

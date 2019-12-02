@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  backend: 'http://akselhj.nb.no:8082/api/'
+  backend: 'http://akselhj.nb.no:8082/api/',
+  webSocket: 'ws://akselhj.nb.no:8082/ws',
 };
 
 /*

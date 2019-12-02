@@ -1,98 +1,217 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter, Inject,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  ViewChild
-} from '@angular/core';
-import {CdkDragDrop, CdkDragMove, CdkDragStart} from "@angular/cdk/drag-drop";
-import {StorageEntity} from "../../../model/storage-entity";
+import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output,} from '@angular/core';
+import {CdkDragDrop, CdkDragEnter, CdkDragMove} from "@angular/cdk/drag-drop";
+import {DisplayStorageEntity, StorageEntityMeta} from "../../../model/storage-entity";
 import {EntityType} from "../../../model/entity-type.enum";
-import {DOCUMENT} from "@angular/common";
+import {interval} from "rxjs";
+import {endWith, map, startWith, take} from "rxjs/operators";
+import {DropBehaviourData} from "../../../model/drop-behaviour-data";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {NewStorageEntityComponent} from "../new-storage-entity/new-storage-entity.component";
+import {MatDialog} from "@angular/material/dialog";
+import {NewEntityAction, NewEntityDialogData} from "../../../model/new-entity-dialog-data";
 
 // Sources: code is heavily based on Ilya Pakhomov's code that can be found here:
 // https://stackblitz.com/edit/angular-cdk-nested-drag-drop-demo
 @Component({
   selector: 'app-storage-entity-draggable',
   templateUrl: './storage-entity-draggable.component.html',
-  styleUrls: ['./storage-entity-draggable.component.scss']
+  styleUrls: ['./storage-entity-draggable.component.scss', '../drag-drop-root.component.scss']
 })
 export class StorageEntityDraggableComponent implements OnChanges, OnInit, AfterViewInit {
 
-  @Input() parentEntity?: StorageEntity;
-  @Input() storageNode: StorageEntity;
-  @Input() allNonObjectBarcodes: string[];
+  readonly ILLEGAL_MOVE_COLOR = 'rgb(230, 20, 20, 0.6)';
+  private readonly ROOT_NODE = 'rootNode';
 
-  @Output() entityMove: EventEmitter<CdkDragMove<StorageEntity>>;
-  @Output() entityDrop: EventEmitter<CdkDragDrop<StorageEntity>>;
+  @Input() parentEntity?: DisplayStorageEntity;
+  @Input() storageNode: DisplayStorageEntity;
+  @Input() allPossibleEntityRelations: StorageEntityMeta[];
+  @Input() dropBehaviourData: DropBehaviourData;
+  @Input() depth: number;
+  @Input() overwriteNodeColor?: string;
+
+  @Output() entityMove: EventEmitter<CdkDragMove<DisplayStorageEntity>>;
+  @Output() entityDrop: EventEmitter<CdkDragDrop<DisplayStorageEntity>>;
 
   public get dragDisabled(): boolean {
     return !this.parentEntity;
   }
 
   public get parentEntityId(): string {
-    return this.parentEntity?.barcode ?? '';
+    return this.parentEntity?.barcode + this.storageNode.barcode ?? this.ROOT_NODE;
   }
 
   public get getChildCount(): number {
-    return this.storageNode.children?.length ?? 0;
+      return this.countChildren(this.storageNode);
+  }
+
+  // TODO: do we want shallow child count?
+  public countChildren(storageNode: DisplayStorageEntity): number {
+    let count = storageNode.children.length;
+    for (let child of storageNode.children) {
+      if (child.children.length > 0) {
+        count += this.countChildren(child);
+      }
+    }
+    return count;
   }
 
   public get isObjectType(): boolean {
-    return this.storageNode.entityType == EntityType.OBJECT;
+    return this.storageNode.entityType === EntityType.OBJECT;
   }
 
-  backgroundColor: string;
+  public get getEntityTypeString(): string {
+    return EntityType[this.storageNode.entityType].toLocaleLowerCase();
+  }
 
+  public get getDisplayString() {
+    return this.storageNode.alias ?? this.storageNode.barcode;
+  }
 
+  private nodeBackgroundColor: string;
+  private dropListBackgroundColor: string;
+  private formattedDescription: string;
+  private listMargin: string;
+  private prevParentId: string = '';
 
-  constructor() {
-    this.entityDrop = new EventEmitter<CdkDragDrop<StorageEntity>>();
-    this.entityMove = new EventEmitter<CdkDragMove<StorageEntity>>();
+  constructor(private _snackBar: MatSnackBar,
+              public _addEntityDialog: MatDialog) {
+    this.entityDrop = new EventEmitter<CdkDragDrop<DisplayStorageEntity>>();
+    this.entityMove = new EventEmitter<CdkDragMove<DisplayStorageEntity>>();
   }
 
   ngOnInit(): void {
-    switch (this.storageNode.entityType) {
-      case EntityType.OBJECT:
-        this.backgroundColor = 'rgb(155, 209, 232, 0.8)';
-        break;
-      case EntityType.BOX:
-        this.backgroundColor = 'rgb(175, 155, 232, 0.8)';
-        break;
-      case EntityType.CRATE:
-        this.backgroundColor = 'rgb(230, 173, 232, 0.8)';
-        break;
-      case EntityType.PALLET:
-        this.backgroundColor = 'rgb(232, 173, 173, 0.8)';
-        break;
-      case EntityType.LOCATION:
-        this.backgroundColor = 'rgb(232, 208, 173, 0.8)';
-        break;
+    if (this.overwriteNodeColor) {
+      this.nodeBackgroundColor = this.overwriteNodeColor;
+    } else {
+      switch (this.storageNode.entityType) {
+        case EntityType.OBJECT:
+          this.nodeBackgroundColor = 'rgb(155, 209, 232, opacity)';
+          break;
+        case EntityType.BOX:
+          this.nodeBackgroundColor = 'rgb(175, 155, 232, opacity)';
+          break;
+        case EntityType.CRATE:
+          this.nodeBackgroundColor = 'rgb(230, 173, 232, opacity)';
+          break;
+        case EntityType.PALLET:
+          this.nodeBackgroundColor = 'rgb(232, 173, 173, opacity)';
+          break;
+        case EntityType.WORK_AREA:
+          this.nodeBackgroundColor = 'rgb(232, 208, 173, opacity)';
+          break;
+      }
     }
   }
 
   ngOnChanges() {
     // update table
 
-    // fetch new reference as old one is invalid
-    this.storageNode.elementRefCache = new ElementRef(document.getElementById(this.storageNode.barcode));
+    // if the element has been invalidated
+    if (this.storageNode?.containerElementRefCache?.nativeElement.getBoundingClientRect().width === 0) {
+      this.storageNode.containerElementRefCache = new ElementRef(document.getElementById(this.parentEntityId));
+    }
+
+    // if margin needs to be updated
+    if (this.prevParentId !== this.parentEntityId) {
+      const marginlr    = Math.max(30 - this.depth * 2, 0);
+      this.listMargin  = `0 ${marginlr}px 0 ${marginlr}px`;
+
+      const childCount = this.getChildCount;
+      this.formattedDescription = (childCount > 0 ? `${childCount} child entities` : 'no children');
+
+      this.prevParentId = this.parentEntityId;
+    }
+
+
   }
 
   ngAfterViewInit(): void {
     // we set all children  because of bindings between components
-    this.storageNode.elementRefCache = this.storageNode.elementRefCache ?? new ElementRef(document.getElementById(this.storageNode.barcode));
+    this.storageNode.containerElementRefCache
+      = this.storageNode.containerElementRefCache ?? new ElementRef(document.getElementById(this.parentEntityId));
   }
 
-  public onDragDrop(event: CdkDragDrop<StorageEntity>): void {
-    this.entityDrop.emit(event);
+  public onDragDrop(event: CdkDragDrop<DisplayStorageEntity>): void {
+    if (this.dropBehaviourData.predicate(event.item.data, this.storageNode)) {
+      this.entityDrop.emit(event);
+      this.dropListBackgroundColor = '';
+    } else {
+      this.toastIllegalDropMessage(event.item.data.entityType, event.container.data.entityType);
+      this.entityMove.emit(null);
+      interval(140).pipe(
+        take(3),
+        map(n => (n % 2 == 0) ? this.ILLEGAL_MOVE_COLOR : ''),
+        startWith(''),
+        endWith(''),
+      ).subscribe( c => {
+        this.dropListBackgroundColor = c
+      });
+    }
   }
 
-  public onDragMove(event: CdkDragMove<StorageEntity>): void {
+  public onDragMove(event: CdkDragMove<DisplayStorageEntity>): void {
     this.entityMove.emit(event);
+
+    if (!event || event.source.data !== this.storageNode) {
+      return;
+    }
+
+    const nodeMovePreview = new ElementRef<HTMLElement>(document.getElementById(this.storageNode.barcode + 'preview'));
+    if (!nodeMovePreview.nativeElement) {
+      return;
+    }
+
+    const moveNodeRect = nodeMovePreview.nativeElement.getBoundingClientRect();
+
+    const xPos = event.pointerPosition.x - moveNodeRect.width * 0.5;
+    const yPos = event.pointerPosition.y - 5;
+    nodeMovePreview.nativeElement.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
   }
 
+  public opacityAsCSSStr(opacity: number): string {
+    return this.nodeBackgroundColor.replace('opacity', opacity.toString());
+  }
+
+  public onEntityEnterList(event: CdkDragEnter<DisplayStorageEntity>): void {
+    if (this.dropBehaviourData.predicate(event.item.data, this.storageNode)) {
+      this.dropListBackgroundColor = 'lightgreen';
+    } else {
+      this.dropListBackgroundColor = this.ILLEGAL_MOVE_COLOR;
+    }
+  }
+
+  public onEntityExitList(): void {
+    this.dropListBackgroundColor = '';
+  }
+
+  public toastIllegalDropMessage(movedType: EntityType, targetType: EntityType) {
+    const errMsg = this.dropBehaviourData.illegalDropMessage
+      .replace('{0}', EntityType[movedType].toLocaleLowerCase())
+      .replace('{1}', EntityType[targetType].toLocaleLowerCase());
+
+    this._snackBar.open( errMsg,'ok', {
+      data: 'Insert an id that exist in (m)optidev',
+      duration: 5500,
+      verticalPosition: 'top',
+    });
+  }
+
+  onNewEntityClicked() {
+    const dialogRef = this._addEntityDialog.open(NewStorageEntityComponent, {
+      minWidth: '300px',
+      maxWidth: '1000px',
+      width: '25vh',
+      data: 'Create an alias for entity'
+    });
+
+    dialogRef.afterClosed().subscribe((result: NewEntityDialogData) => {
+      if (result?.action == NewEntityAction.SUBMIT) {
+        this.storageNode.alias = result.entityId
+      }
+    });
+  }
+
+  childTrackByFn(index: number, child: DisplayStorageEntity): string {
+    return child.barcode+index;
+  }
 }

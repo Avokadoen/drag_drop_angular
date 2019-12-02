@@ -1,49 +1,55 @@
 ul, li {
-  margin: 15px 0 15px 1px;
+  margin: 15px 0 15px 0;
   border-radius: 4px;
   list-style: none;
   padding-top: 10px;
+  padding-left: 0;
   padding-bottom: 10px;
 }
 
-
 .entity {
   &-drop-zone {
+    margin: 0 0 0 0;
     background-color: rgb(0, 0, 0, 0.2);
     min-height: 20px;
-
-    &.parent {
-      border-radius: 4px;
-      border-color: black;
-      border-width: 1px;
-    }
   }
 
   &-drag {
     &-handle {
       width: 100%;
-      min-height: 4vh;
+      min-height: 75px;
       display: inline-flex;
       align-items: center;
+      cursor: move;
     }
 
     &-preview {
       box-sizing: border-box;
       border-radius: 4px;
       box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
-      background-color: rgb(255, 255, 255, 0.8);
+      min-height: 200px;
+      min-width: 150px;
       height: 10vh;
       width: 10vh;
+      color: white;
+      text-shadow: -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px 1px 0 #000;
+    }
+
+    &-preview h4 {
+      text-align: center;
+    }
+
+    &-preview p {
+      margin: 0 10px 0 10px;
     }
 
     &-list {
       border-radius: 4px;
     }
   }
-}
-
-.cdk-drop-list-dragging {
-  background: lightgreen;
 }
 
 .cdk-drag-placeholder {

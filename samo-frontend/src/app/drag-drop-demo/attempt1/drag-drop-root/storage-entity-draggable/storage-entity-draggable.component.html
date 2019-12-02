@@ -1,36 +1,56 @@
 <div cdkDropList
      class="entity-drag-list"
-     [ngStyle]="{'background-color': this.backgroundColor}"
+     [ngStyle]="{
+      'background-color': this.opacityAsCSSStr(0.75),
+       'margin': listMargin
+      }"
      [id]="parentEntityId"
      [cdkDropListData]="parentEntity"
-     [cdkDropListConnectedTo]="storageNode.barcode| removeSelf: allNonObjectBarcodes"
+     [cdkDropListConnectedTo]="storageNode.barcode | removeSelf: allPossibleEntityRelations"
      (cdkDropListDropped)="onDragDrop($event)">
+
   <div cdkDrag
        [id]="storageNode.barcode"
        [cdkDragData]="storageNode"
        [cdkDragDisabled]="dragDisabled"
-       (cdkDragMoved)="onDragMove($event)">
+       (cdkDragMoved)="onDragMove($event)"
+        fxLayout="row">
     <div title="Drag this entity and its children"
          class="entity-drag-handle"
+         (click)="onNewEntityClicked()"
          cdkDragHandle>
-      {{storageNode.barcode}}
       <mat-icon *ngIf="!dragDisabled">
         drag_indicator
       </mat-icon>
+      {{getDisplayString}} - {{getEntityTypeString}}
+    </div>
+    <div
+      [id]="storageNode.barcode + 'preview'"
+      [ngStyle]="{'background-color': this.opacityAsCSSStr(0.6)}"
+      class="entity-drag-preview"
+      *cdkDragPreview>
+      <h4>{{storageNode.barcode}}</h4>
+      <p>{{formattedDescription}}</p>
     </div>
   </div>
+
   <ul *ngIf="!isObjectType"
       cdkDropList
       class="entity-drop-zone"
       [id]="storageNode.barcode"
-      [cdkDropListConnectedTo]="storageNode.barcode | removeSelf: allNonObjectBarcodes"
+      [ngStyle]="{'background': dropListBackgroundColor}"
+      [cdkDropListConnectedTo]="storageNode.barcode | removeSelf: allPossibleEntityRelations"
       [cdkDropListData]="storageNode"
-      (cdkDropListDropped)="onDragDrop($event)">
-    <li *ngFor="let child of storageNode.children">
+      (cdkDropListDropped)="onDragDrop($event)"
+      (cdkDropListEntered)="onEntityEnterList($event)"
+      (cdkDropListExited)="onEntityExitList()">
+    <li *ngFor="let child of storageNode.children; trackBy: childTrackByFn">
       <app-storage-entity-draggable
         [storageNode]="child"
         [parentEntity]="storageNode"
-        [allNonObjectBarcodes]="allNonObjectBarcodes"
+        [allPossibleEntityRelations]="allPossibleEntityRelations"
+        [dropBehaviourData]="dropBehaviourData"
+        [depth]="depth + 1"
         (entityDrop)="onDragDrop($event)"
         (entityMove)="onDragMove($event)">
       </app-storage-entity-draggable>
