@@ -22,9 +22,10 @@ import {findNode} from "@angular/compiler";
 })
 export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
 
-  readonly DELETE_NODE: StorageEntity = {
+  readonly DELETE_NODE: DisplayStorageEntity = {
     barcode: 'deleteList',
-    entityType: EntityType.WORK_AREA,
+    alias: 'delete list',
+    entityType: EntityType.LOCATION,
     children: [],
   };
 
@@ -48,8 +49,9 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
 
   storageRoot: DisplayStorageEntity =
     {
-      barcode: 'Work area',
-      entityType: EntityType.WORK_AREA,
+      barcode: 'Ranamottaj',
+      entityType: EntityType.LOCATION,
+      alias: 'Rana mottak',
       children: [
         {
           barcode: 'pallet1',

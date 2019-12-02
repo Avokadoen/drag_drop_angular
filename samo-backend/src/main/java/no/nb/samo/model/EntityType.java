@@ -6,5 +6,4 @@ public enum EntityType {
     CRATE,
     PALLET,
     LOCATION,
-    WORK_AREA,
 }

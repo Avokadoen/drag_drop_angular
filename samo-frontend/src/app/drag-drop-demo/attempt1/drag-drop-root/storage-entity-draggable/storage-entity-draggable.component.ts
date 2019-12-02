@@ -96,7 +96,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
         case EntityType.PALLET:
           this.nodeBackgroundColor = 'rgb(232, 173, 173, opacity)';
           break;
-        case EntityType.WORK_AREA:
+        case EntityType.LOCATION:
           this.nodeBackgroundColor = 'rgb(232, 208, 173, opacity)';
           break;
       }

@@ -3,5 +3,5 @@ export enum EntityType {
   BOX,
   CRATE,
   PALLET,
-  WORK_AREA,
+  LOCATION,
 }
