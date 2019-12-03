@@ -1,4 +1,5 @@
 <div cdkDropList
+     [cdkDropListAutoScrollDisabled]="true"
      class="entity-drag-list"
      [ngStyle]="{
       'background-color': this.opacityAsCSSStr(0.75),
@@ -36,6 +37,7 @@
 
   <ul *ngIf="!isObjectType"
       cdkDropList
+      [cdkDropListAutoScrollDisabled]="true"
       class="entity-drop-zone"
       [id]="storageNode.barcode"
       [ngStyle]="{'background': dropListBackgroundColor}"

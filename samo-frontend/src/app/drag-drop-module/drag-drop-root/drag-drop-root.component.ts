@@ -1,5 +1,5 @@
 import {Component, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DisplayStorageEntity, StorageEntity, StorageEntityMeta} from "../model/storage-entity";
+import {DisplayStorageEntity, StorageEntity, StorageEntityMeta, UtilityStorageEntity} from "../model/storage-entity";
 import {EntityType} from "../model/entity-type.enum";
 import {CdkDragDrop, CdkDragMove, moveItemInArray, transferArrayItem,} from "@angular/cdk/drag-drop";
 import {ScreenPosition} from "../model/screen-position";
@@ -14,6 +14,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {Subject} from "rxjs";
 import {cdkEventIntoNodeChangeEvent, NodeChange} from "../model/node-change-event";
 
+// TODO: rewrite web socket sync logic to ignore sort only events
 @Component({
   selector: 'app-drag-drop-root',
   templateUrl: './drag-drop-root.component.html',
@@ -21,7 +22,7 @@ import {cdkEventIntoNodeChangeEvent, NodeChange} from "../model/node-change-even
 })
 export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
 
-  readonly DELETE_NODE: DisplayStorageEntity = {
+  readonly DELETE_NODE: UtilityStorageEntity = {
     barcode: 'deleteList',
     alias: 'delete list',
     entityType: EntityType.LOCATION,
@@ -42,9 +43,9 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
     illegalDropMessage: 'Cannot move an entity of type {0} into an entity of type {1}',
   };
 
-  @ViewChild('drawer', {static: true}) drawer: MatSidenav;
-
   private readonly DESTROYED$ = new Subject();
+
+  @ViewChild('drawer', {static: true}) drawer: MatSidenav;
 
   storageRoot: DisplayStorageEntity =
     {
@@ -150,7 +151,7 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
     const currentIndex = currentParent.children.indexOf(event.item.data);
     const targetIndex
       = (newParent.barcode !== this.DELETE_NODE.barcode)
-      ? this.calculateNewIndex(this.currentEntityEvent.pointerPosition, movingEntity.barcode, newParent.children as DisplayStorageEntity[])
+      ? DragDropRootComponent.calculateNewIndex(this.currentEntityEvent.pointerPosition, movingEntity.barcode, newParent.children as DisplayStorageEntity[])
       : 0;
 
     const change = cdkEventIntoNodeChangeEvent(event, currentIndex, targetIndex);
@@ -159,7 +160,6 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   public handleNodeChange(change: NodeChange) {
-
     if (!change.movingEntity || !change.currentParent || !change.newParent) {
       this.snackBar.open('Entity tree is out of sync, please refresh page!','ok', {
         duration: 20000,
@@ -224,21 +224,6 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
     return null;
   }
 
-  private calculateDepthOfNode(targetBarcode: string, currentTreeNode: DisplayStorageEntity, depth: number): number {
-    if (currentTreeNode.barcode == targetBarcode) {
-      return depth;
-    }
-
-    for (const child of currentTreeNode.children) {
-      const newDepth = this.calculateDepthOfNode(targetBarcode, child, depth + 1);
-      if (newDepth > 0) {
-        return newDepth;
-      }
-    }
-
-    return -1;
-  }
-
   private simplifyStorageNodes(storageEntity: DisplayStorageEntity): StorageEntityMeta[] {
     let simplifiedNodes = storageEntity.entityType != EntityType.OBJECT ? [storageEntity as StorageEntityMeta] : [];
     storageEntity.children.forEach((childItem) => { simplifiedNodes = simplifiedNodes.concat(this.simplifyStorageNodes(childItem)) });
@@ -262,26 +247,28 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
     this.handleNodeChange(change);
   }
 
-  private calculateNewIndex(releasedPosition: ScreenPosition, releasedEntity: string, newSiblings: DisplayStorageEntity[]): number {
-    let index = 0;
-    let releaseOffset = 0;
-    for (const sibling of newSiblings) {
-      const siblingRect = sibling.containerElementRefCache.nativeElement.getBoundingClientRect();
-      const indexThreshold = siblingRect.top + siblingRect.height;
-      // TODO: refactor this part
-      // if offset has not been set
-      if (releaseOffset === 0) {
-        // attempt to set it
-        releaseOffset = (this.calculateDepthOfNode(releasedEntity, sibling, 0) > 0)
-          ? 75 // entity handle height TODO: less dependent on magic number
-          : releaseOffset;
-      }
-      if (indexThreshold > releasedPosition.y + releaseOffset) {
-        return index;
-      }
+  private static calculateNewIndex(releasedPosition: ScreenPosition, releasedEntity: string, newSiblings: DisplayStorageEntity[]): number {
+    const indexOfReleased = newSiblings.findIndex(s => s.barcode === releasedEntity);
+    const releaseOffsetPredicate = (indexOfReleased >= 0)
+                                  ? (y: number, index: number) => { return y + ((index > indexOfReleased) ? 75 : 0) }
+                                  : (y: number, _i: number) => { return y };
 
-      index++;
+    const siblingCount = newSiblings.length;
+    for (let i = 0; i < siblingCount; i++) {
+      const siblingOverNative = (i > 0 && i < siblingCount) ? newSiblings[i - 1].containerElementRefCache.nativeElement : null;
+      const siblingUnderNative = newSiblings[i].containerElementRefCache.nativeElement;
+
+      const siblingOverBound = siblingOverNative?.getBoundingClientRect();
+      const siblingUnderBound = siblingUnderNative.getBoundingClientRect();
+
+      const underOverSibling = !siblingOverBound || releasedPosition.y > releaseOffsetPredicate(siblingOverBound.y, i) - siblingOverBound.height * 0.45;
+      const overUnderSibling = releasedPosition.y < releaseOffsetPredicate(siblingUnderBound.y, i) + siblingUnderBound.height;
+
+      if (underOverSibling && overUnderSibling) {
+        return i;
+      }
     }
-    return index;
+
+    return siblingCount;
   }
 }

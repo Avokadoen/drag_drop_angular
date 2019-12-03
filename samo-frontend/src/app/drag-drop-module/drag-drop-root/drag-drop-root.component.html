@@ -1,7 +1,7 @@
 
 <mat-drawer-container>
   <mat-drawer #drawer mode="side" opened>
-    <!-- TODO: sett move event to null in another more robust one-time way"-->
+    <!-- TODO: set move event to null in another more robust one-time way"-->
     <app-storage-entity-draggable class="action-segment"
                                   [storageNode]="DELETE_NODE"
                                   [allPossibleEntityRelations]="getSimplifiedTree"

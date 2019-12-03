@@ -20,7 +20,7 @@ public class StompConfiguration implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOrigins("http://akselhj.nb.no:4200");
+        registry.addEndpoint("/ws").setAllowedOrigins("http://akselhj.nb.no:4200", "localhost:4200");
     }
 
 }

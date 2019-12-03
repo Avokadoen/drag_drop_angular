@@ -9,6 +9,15 @@ export interface DisplayStorageEntity {
   alias?: string;
 }
 
+export interface UtilityStorageEntity {
+  barcode: string;
+  entityType: EntityType.LOCATION;
+  children: [];
+  containerElementRefCache?: ElementRef<Element>;
+  alias?: string;
+}
+
+
 export interface StorageEntity {
   barcode: string;
   entityType: EntityType;

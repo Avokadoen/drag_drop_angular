@@ -9,6 +9,7 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
 import {MatButtonModule} from "@angular/material/button";
 import {RemoveSelfPipe} from "./drag-drop-root/pipes/remove-self.pipe";
 import {MatIconModule} from "@angular/material/icon";
+import {FlexModule} from "@angular/flex-layout";
 
 
 @NgModule({
@@ -19,6 +20,7 @@ import {MatIconModule} from "@angular/material/icon";
     DragDropModule,
     MatButtonModule,
     MatIconModule,
+    FlexModule,
   ],
   declarations: [
     DragDropRootComponent,
