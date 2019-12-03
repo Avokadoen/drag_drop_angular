@@ -1,6 +1,6 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {NewEntityAction, NewEntityDialogData} from "../../../model/new-entity-dialog-data";
+import {NewEntityAction, NewEntityDialogData} from "../../model/new-entity-dialog-data";
 
 @Component({
   selector: 'app-new-storage-entity',

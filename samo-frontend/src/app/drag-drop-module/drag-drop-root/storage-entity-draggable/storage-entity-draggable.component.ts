@@ -1,14 +1,14 @@
 import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output,} from '@angular/core';
 import {CdkDragDrop, CdkDragEnter, CdkDragMove} from "@angular/cdk/drag-drop";
-import {DisplayStorageEntity, StorageEntityMeta} from "../../../model/storage-entity";
-import {EntityType} from "../../../model/entity-type.enum";
+import {DisplayStorageEntity, StorageEntityMeta} from "../../model/storage-entity";
 import {interval} from "rxjs";
 import {endWith, map, startWith, take} from "rxjs/operators";
-import {DropBehaviourData} from "../../../model/drop-behaviour-data";
+import {DropBehaviourData} from "../../model/drop-behaviour-data";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {NewStorageEntityComponent} from "../new-storage-entity/new-storage-entity.component";
 import {MatDialog} from "@angular/material/dialog";
-import {NewEntityAction, NewEntityDialogData} from "../../../model/new-entity-dialog-data";
+import {NewEntityAction, NewEntityDialogData} from "../../model/new-entity-dialog-data";
+import {EntityType} from "../../model/entity-type.enum";
 
 // Sources: code is heavily based on Ilya Pakhomov's code that can be found here:
 // https://stackblitz.com/edit/angular-cdk-nested-drag-drop-demo
@@ -106,15 +106,13 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   ngOnChanges() {
     // update table
 
-    // if the element has been invalidated
-    if (this.storageNode?.containerElementRefCache?.nativeElement.getBoundingClientRect().width === 0) {
-      this.storageNode.containerElementRefCache = new ElementRef(document.getElementById(this.parentEntityId));
-    }
+    this.storageNode.containerElementRefCache = new ElementRef(document.getElementById(this.parentEntityId));
 
     // if margin needs to be updated
+    // move to pipe?
     if (this.prevParentId !== this.parentEntityId) {
-      const marginlr    = Math.max(30 - this.depth * 2, 0);
-      this.listMargin  = `0 ${marginlr}px 0 ${marginlr}px`;
+      const marginlr  = Math.max(30 - this.depth * 2, 0);
+      this.listMargin = `0 ${marginlr}px 0 ${marginlr}px`;
 
       const childCount = this.getChildCount;
       this.formattedDescription = (childCount > 0 ? `${childCount} child entities` : 'no children');
@@ -162,9 +160,9 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     }
 
     const moveNodeRect = nodeMovePreview.nativeElement.getBoundingClientRect();
-
     const xPos = event.pointerPosition.x - moveNodeRect.width * 0.5;
     const yPos = event.pointerPosition.y - 5;
+
     nodeMovePreview.nativeElement.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
   }
 

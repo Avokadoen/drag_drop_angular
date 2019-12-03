@@ -41,22 +41,11 @@ import { HoverFocusDirective } from './shared/directories/hover-focus.directive'
 import { LoadingIndicatorDirective } from './shared/directories/loading-indicator.directive';
 import { H3IconAlignDirective } from './shared/directories/h3-icon-align.directive';
 import { ScrollRotateDirective } from './shared/directories/scroll-rotate.directive';
-import { DragDropRootComponent } from './drag-drop-demo/attempt1/drag-drop-root/drag-drop-root.component';
-import {DragDropModule} from "@angular/cdk/drag-drop";
-import { RemoveSelfPipe } from './drag-drop-demo/remove-self.pipe';
-import {StorageEntityDraggableComponent} from "./drag-drop-demo/attempt1/drag-drop-root/storage-entity-draggable/storage-entity-draggable.component";
-import {NewStorageEntityComponent} from "./drag-drop-demo/attempt1/drag-drop-root/new-storage-entity/new-storage-entity.component";
-import {WebSocketService} from "./drag-drop-demo/web-socket/web-socket.service";
+import {NewStorageEntityComponent} from "./drag-drop-module/drag-drop-root/new-storage-entity/new-storage-entity.component";
+import {WebSocketService} from "./drag-drop-module/web-socket/web-socket.service";
+import {EntityDragDropModule} from "./drag-drop-module/entity-drag-drop.module";
+import { appRouting } from './app.routing';
 
-const appRoutes: Routes = [
-  { path: 'dashboard/:user', component: InternalDashboardComponent},
-  { path: 'delivery-list/:id', component: DeliveryListComponent},
-  { path: 'generate-register', component: GenerateRegisterDeliveryComponent},
-  { path: 'drag-drop-demo', component: DragDropRootComponent},
-  { path: 'test', component: ReactiveTestComponent},
-  { path: '', pathMatch: 'full', component: ObjectRootComponent},
-  { path: '**', component: NotFoundPageComponent},
-];
 
 const dependencies = [
   BrowserModule,
@@ -96,11 +85,8 @@ const dependencies = [
   entryComponents: [ControlFormComponent, NewStorageEntityComponent],
   imports: [
     dependencies,
-    RouterModule.forRoot(
-      appRoutes,
-      {enableTracing: false} // <-- debugging purposes only
-    ),
-    DragDropModule,
+    appRouting,
+    EntityDragDropModule,
   ],
   exports: [
     dependencies,
@@ -123,10 +109,6 @@ const dependencies = [
     LoadingIndicatorDirective,
     H3IconAlignDirective,
     ScrollRotateDirective,
-    DragDropRootComponent,
-    RemoveSelfPipe,
-    StorageEntityDraggableComponent,
-    StorageEntityDraggableComponent,
     NewStorageEntityComponent,
   ],
   providers: [ObjectRetrieverService, WebSocketService],

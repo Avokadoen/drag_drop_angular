@@ -1,10 +1,10 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {RxStomp} from "@stomp/rx-stomp";
-import {environment} from "../../../environments/environment";
 import {EntityWsEvent} from "../model/entity-ws-event";
 import {NodeChange} from "../model/node-change-event";
 import {map, takeUntil} from "rxjs/operators";
 import {Subject} from "rxjs";
+import {environment} from "../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +19,8 @@ export class WebSocketService implements OnDestroy{
 
   readonly CHANGE$ = new Subject<EntityWsEvent>();
 
+  // TODO: have a request change observer function where we lazy load a new watch if we don't have given url
+  // i.e: getObserverFor(url: string)
   constructor() {
     const stompConfig = {
       brokerURL: environment.webSocket,

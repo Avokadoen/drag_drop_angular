@@ -1,19 +1,18 @@
 import {Component, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DisplayStorageEntity, StorageEntity, StorageEntityMeta} from "../../model/storage-entity";
-import {EntityType} from "../../model/entity-type.enum";
+import {DisplayStorageEntity, StorageEntity, StorageEntityMeta} from "../model/storage-entity";
+import {EntityType} from "../model/entity-type.enum";
 import {CdkDragDrop, CdkDragMove, moveItemInArray, transferArrayItem,} from "@angular/cdk/drag-drop";
-import {ScreenPosition} from "../../model/screen-position";
-import {DropBehaviourData} from "../../model/drop-behaviour-data";
+import {ScreenPosition} from "../model/screen-position";
+import {DropBehaviourData} from "../model/drop-behaviour-data";
 import {MatSidenav} from "@angular/material/sidenav";
 import {NewStorageEntityComponent} from "./new-storage-entity/new-storage-entity.component";
 import {MatDialog} from "@angular/material/dialog";
-import {WebSocketService} from "../../web-socket/web-socket.service";
-import {EntityWsEvent} from "../../model/entity-ws-event";
-import {map, takeUntil} from "rxjs/operators";
+import {WebSocketService} from "../web-socket/web-socket.service";
+import {EntityWsEvent} from "../model/entity-ws-event";
+import {takeUntil} from "rxjs/operators";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Subject} from "rxjs";
-import {cdkEventIntoNodeChangeEvent, NodeChange} from "../../model/node-change-event";
-import {findNode} from "@angular/compiler";
+import {cdkEventIntoNodeChangeEvent, NodeChange} from "../model/node-change-event";
 
 @Component({
   selector: 'app-drag-drop-root',
