@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {StorageEntityPanelComponent} from "./storage-entity-panel.component";
 
-import { NewStorageEntityDialogComponent } from './new-storage-entity-dialog.component';
 
 describe('NewStorageEntityDialogComponent', () => {
-  let component: NewStorageEntityDialogComponent;
-  let fixture: ComponentFixture<NewStorageEntityDialogComponent>;
+  let component: StorageEntityPanelComponent;
+  let fixture: ComponentFixture<StorageEntityPanelComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NewStorageEntityDialogComponent ]
+      declarations: [ StorageEntityPanelComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NewStorageEntityDialogComponent);
+    fixture = TestBed.createComponent(StorageEntityPanelComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -10,6 +10,12 @@ import {MatButtonModule} from "@angular/material/button";
 import {RemoveSelfPipe} from "./drag-drop-root/pipes/remove-self.pipe";
 import {MatIconModule} from "@angular/material/icon";
 import {FlexModule} from "@angular/flex-layout";
+import {StorageEntityPanelComponent} from "./drag-drop-root/storage-entity-panel/storage-entity-panel.component";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {MatDividerModule} from "@angular/material/divider";
+import {FormsModule} from "@angular/forms";
+import {MatInputModule} from "@angular/material/input";
+import {MatDialogModule} from "@angular/material/dialog";
 
 
 @NgModule({
@@ -21,17 +27,24 @@ import {FlexModule} from "@angular/flex-layout";
     MatButtonModule,
     MatIconModule,
     FlexModule,
+    MatFormFieldModule,
+    MatDividerModule,
+    FormsModule,
+    MatInputModule,
+    MatDialogModule,
   ],
   declarations: [
     DragDropRootComponent,
     StorageEntityDraggableComponent,
     RemoveSelfPipe,
+    StorageEntityPanelComponent
   ],
   exports: [
     DragDropRootComponent,
   ],
   providers: [
     WebSocketService
-  ]
+  ],
+  entryComponents: [StorageEntityPanelComponent]
 })
 export class EntityDragDropModule { }

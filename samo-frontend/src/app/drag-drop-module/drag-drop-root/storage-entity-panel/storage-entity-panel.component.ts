@@ -8,11 +8,11 @@ import {Subject} from "rxjs";
 import {delay, takeUntil} from "rxjs/operators";
 
 @Component({
-  selector: 'app-new-storage-entity',
-  templateUrl: './new-storage-entity.component.html',
-  styleUrls: ['./new-storage-entity.component.css']
+  selector: 'app-storage-entity-panel',
+  templateUrl: './storage-entity-panel.component.html',
+  styleUrls: ['./storage-entity-panel.component.css']
 })
-export class NewStorageEntityComponent implements OnDestroy {
+export class StorageEntityPanelComponent implements OnDestroy {
 
   public data: NewEntityDialogData = {
     alias: '',
@@ -35,7 +35,7 @@ export class NewStorageEntityComponent implements OnDestroy {
   private timeBetweenSum: number;
   private scheduleImport$: Subject<void>;
 
-  constructor(public dialogRef: MatDialogRef<NewStorageEntityComponent>,
+  constructor(public dialogRef: MatDialogRef<StorageEntityPanelComponent>,
               @Inject(DOCUMENT) public document,
               @Inject(MAT_DIALOG_DATA) public config: NewEntityDialogConfig) {
 

@@ -41,7 +41,6 @@ import { HoverFocusDirective } from './shared/directories/hover-focus.directive'
 import { LoadingIndicatorDirective } from './shared/directories/loading-indicator.directive';
 import { H3IconAlignDirective } from './shared/directories/h3-icon-align.directive';
 import { ScrollRotateDirective } from './shared/directories/scroll-rotate.directive';
-import {NewStorageEntityComponent} from "./drag-drop-module/drag-drop-root/new-storage-entity/new-storage-entity.component";
 import {WebSocketService} from "./drag-drop-module/web-socket/web-socket.service";
 import {EntityDragDropModule} from "./drag-drop-module/entity-drag-drop.module";
 import { appRouting } from './app.routing';
@@ -82,7 +81,7 @@ const dependencies = [
 ];
 
 @NgModule({
-  entryComponents: [ControlFormComponent, NewStorageEntityComponent],
+  entryComponents: [ControlFormComponent],
   imports: [
     dependencies,
     appRouting,
@@ -109,7 +108,6 @@ const dependencies = [
     LoadingIndicatorDirective,
     H3IconAlignDirective,
     ScrollRotateDirective,
-    NewStorageEntityComponent,
   ],
   providers: [ObjectRetrieverService, WebSocketService],
   bootstrap: [AppComponent]

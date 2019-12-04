@@ -5,10 +5,10 @@ import {interval} from "rxjs";
 import {endWith, map, startWith, take} from "rxjs/operators";
 import {DropBehaviourData} from "../../model/drop-behaviour-data";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {NewStorageEntityComponent} from "../new-storage-entity/new-storage-entity.component";
 import {MatDialog} from "@angular/material/dialog";
 import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from "../../model/new-entity-dialog-data";
 import {EntityType} from "../../model/entity-type.enum";
+import {StorageEntityPanelComponent} from "../storage-entity-panel/storage-entity-panel.component";
 
 // Sources: code is heavily based on Ilya Pakhomov's code that can be found here:
 // https://stackblitz.com/edit/angular-cdk-nested-drag-drop-demo
@@ -192,7 +192,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   onNewEntityClicked() {
     const dialogConfig: NewEntityDialogConfig = this.storageNode as NewEntityDialogConfig;
 
-    const dialogRef = this._addEntityDialog.open(NewStorageEntityComponent, {
+    const dialogRef = this._addEntityDialog.open(StorageEntityPanelComponent, {
       minWidth: '300px',
       maxWidth: '1000px',
       width: '25vh',
