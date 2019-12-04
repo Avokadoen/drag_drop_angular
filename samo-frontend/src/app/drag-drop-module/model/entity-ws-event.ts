@@ -3,7 +3,5 @@ export interface EntityWsEvent {
   movingBarcode:          string;
   previousParentBarcode:  string;
   newParentBarcode:       string;
-  currentIndex:           number;
-  targetIndex:            number;
 }
 

@@ -5,8 +5,6 @@ public class EntityWSEvent {
     String movingBarcode;
     String previousParentBarcode;
     String newParentBarcode;
-    int currentIndex;
-    int targetIndex;
 
     public Integer getTimestamp() {
         return timestamp;
@@ -38,21 +36,5 @@ public class EntityWSEvent {
 
     public void setNewParentBarcode(String newParentBarcode) {
         this.newParentBarcode = newParentBarcode;
-    }
-
-    public int getCurrentIndex() {
-        return currentIndex;
-    }
-
-    public void setCurrentIndex(int currentIndex) {
-        this.currentIndex = currentIndex;
-    }
-
-    public int getTargetIndex() {
-        return targetIndex;
-    }
-
-    public void setTargetIndex(int newIndex) {
-        this.targetIndex = newIndex;
     }
 }

@@ -7,7 +7,7 @@ import {DropBehaviourData} from "../../model/drop-behaviour-data";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {NewStorageEntityComponent} from "../new-storage-entity/new-storage-entity.component";
 import {MatDialog} from "@angular/material/dialog";
-import {NewEntityAction, NewEntityDialogData} from "../../model/new-entity-dialog-data";
+import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from "../../model/new-entity-dialog-data";
 import {EntityType} from "../../model/entity-type.enum";
 
 // Sources: code is heavily based on Ilya Pakhomov's code that can be found here:
@@ -158,12 +158,6 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     if (!nodeMovePreview.nativeElement) {
       return;
     }
-
-    const moveNodeRect = nodeMovePreview.nativeElement.getBoundingClientRect();
-    const xPos = event.pointerPosition.x - moveNodeRect.width * 0.5;
-    const yPos = event.pointerPosition.y - 5;
-
-    nodeMovePreview.nativeElement.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
   }
 
   public opacityAsCSSStr(opacity: number): string {
@@ -194,17 +188,25 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     });
   }
 
+  // TODO: move this as a static of the dialog component
   onNewEntityClicked() {
+    const dialogConfig: NewEntityDialogConfig = this.storageNode as NewEntityDialogConfig;
+
     const dialogRef = this._addEntityDialog.open(NewStorageEntityComponent, {
       minWidth: '300px',
       maxWidth: '1000px',
       width: '25vh',
-      data: 'Create an alias for entity'
+      data: dialogConfig
     });
 
     dialogRef.afterClosed().subscribe((result: NewEntityDialogData) => {
       if (result?.action == NewEntityAction.SUBMIT) {
-        this.storageNode.alias = result.entityId
+        if (result.alias) {
+          this.storageNode.alias = result.alias;
+        }
+        if (result.newChildren) {
+          this.storageNode.children = this.storageNode.children.concat(result.newChildren as DisplayStorageEntity[]);
+        }
       }
     });
   }

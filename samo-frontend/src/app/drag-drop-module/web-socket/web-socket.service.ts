@@ -55,8 +55,6 @@ export class WebSocketService implements OnDestroy{
       movingBarcode:          change.movingEntity.barcode,
       previousParentBarcode:  change.currentParent.barcode,
       newParentBarcode:       change.newParent.barcode,
-      currentIndex:           change.currentIndex,
-      targetIndex:            change.targetIndex,
     };
 
     this.RX_STOMP.publish({destination: '/app/storage_entity_change', body: JSON.stringify(parsedEvent)});

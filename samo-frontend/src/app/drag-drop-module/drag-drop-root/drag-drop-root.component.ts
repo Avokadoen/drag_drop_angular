@@ -12,7 +12,8 @@ import {EntityWsEvent} from "../model/entity-ws-event";
 import {takeUntil} from "rxjs/operators";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Subject} from "rxjs";
-import {cdkEventIntoNodeChangeEvent, NodeChange} from "../model/node-change-event";
+import {cdkEventIntoNodeChange, NodeChange} from "../model/node-change-event";
+import {NewEntityAction, NewEntityDialogData} from "../model/new-entity-dialog-data";
 
 // TODO: rewrite web socket sync logic to ignore sort only events
 @Component({
@@ -20,7 +21,7 @@ import {cdkEventIntoNodeChangeEvent, NodeChange} from "../model/node-change-even
   templateUrl: './drag-drop-root.component.html',
   styleUrls: ['./drag-drop-root.component.scss']
 })
-export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
+export class DragDropRootComponent implements OnInit, OnDestroy {
 
   readonly DELETE_NODE: UtilityStorageEntity = {
     barcode: 'deleteList',
@@ -117,21 +118,15 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   constructor(private webSocketService: WebSocketService,
-              public addEntityDialog: MatDialog,
               private snackBar: MatSnackBar,) {
   }
 
-  ngOnInit() {
+  public ngOnInit() {
     this.webSocketService.CHANGE$
       .asObservable()
       .pipe(
         takeUntil(this.DESTROYED$)
       ).subscribe((wsEvent: EntityWsEvent) => this.handleWsEvent(wsEvent));
-  }
-
-  ngOnChanges() {
-    // TODO: generate allObjectBarcodes
-    // TODO: update accept new objects from service
   }
 
   public ngOnDestroy (): void {
@@ -144,22 +139,23 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   public onDragDrop(event: CdkDragDrop<StorageEntity>) {
-    const movingEntity: DisplayStorageEntity  = event.item.data;
-    const currentParent                       = event.previousContainer.data;
-    const newParent                           = event.container.data;
-
-    const currentIndex = currentParent.children.indexOf(event.item.data);
+    const newParent = event.container.data;
     const targetIndex
       = (newParent.barcode !== this.DELETE_NODE.barcode)
-      ? DragDropRootComponent.calculateNewIndex(this.currentEntityEvent.pointerPosition, movingEntity.barcode, newParent.children as DisplayStorageEntity[])
+      ? DragDropRootComponent.calculateNewIndex(this.currentEntityEvent.pointerPosition, newParent.children as DisplayStorageEntity[])
       : 0;
 
-    const change = cdkEventIntoNodeChangeEvent(event, currentIndex, targetIndex);
+    const currentIndex = event.previousContainer.data.children.indexOf(event.item.data);
+    if (currentIndex === targetIndex && event.previousContainer.data === event.container.data) {
+      return;
+    }
+
+    const change = cdkEventIntoNodeChange(event, 0, targetIndex);
     this.webSocketService.sendChange(change);
     this.handleNodeChange(change);
   }
 
-  public handleNodeChange(change: NodeChange) {
+  public handleNodeChange(change: NodeChange, currentIndex?: number) {
     if (!change.movingEntity || !change.currentParent || !change.newParent) {
       this.snackBar.open('Entity tree is out of sync, please refresh page!','ok', {
         duration: 20000,
@@ -170,15 +166,17 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
       return;
     }
 
+    const cIndex = currentIndex ?? change.currentParent.children.indexOf(change.movingEntity);
+
     switch (change.newParent.barcode) {
       case this.DELETE_NODE.barcode:
-        change.currentParent.children.splice(change.currentIndex, 1);
+        change.currentParent.children.splice(cIndex, 1);
         break;
       case change.currentParent.barcode:
-        moveItemInArray(change.currentParent.children, change.currentIndex, change.targetIndex);
+        moveItemInArray(change.currentParent.children, cIndex, change.targetIndex);
         break;
       default:
-        transferArrayItem(change.currentParent.children, change.newParent.children, change.currentIndex, change.targetIndex);
+        transferArrayItem(change.currentParent.children, change.newParent.children, cIndex, change.targetIndex);
         break;
     }
 
@@ -197,16 +195,6 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   onNewEntityClicked() {
-    const dialogRef = this.addEntityDialog.open(NewStorageEntityComponent, {
-      minWidth: '300px',
-      maxWidth: '1000px',
-      width: '25vh',
-      data: 'Import an entity from (m)optidev',
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
-    });
   }
 
   private findNode(targetBarcode: string, currentTreeNode: DisplayStorageEntity): DisplayStorageEntity | null {
@@ -234,37 +222,37 @@ export class DragDropRootComponent implements OnChanges, OnInit, OnDestroy {
     const movingEntity    = this.findNode(event.movingBarcode,          this.storageRoot);
     const currentParent   = this.findNode(event.previousParentBarcode,  this.storageRoot);
     const newParentNode   = this.findNode(event.newParentBarcode,       this.storageRoot);
-    const newParent       = newParentNode ?? this.DELETE_NODE;
 
+    if (currentParent.barcode === newParentNode.barcode) {
+      return;
+    }
+
+    const newParent       = newParentNode ?? this.DELETE_NODE;
     const change: NodeChange = {
       movingEntity:   movingEntity,
       currentParent:  currentParent,
       newParent:      newParent,
-      currentIndex:   event.currentIndex,
-      targetIndex:    event.targetIndex,
+      targetIndex:    0,
     };
 
     this.handleNodeChange(change);
   }
 
-  private static calculateNewIndex(releasedPosition: ScreenPosition, releasedEntity: string, newSiblings: DisplayStorageEntity[]): number {
-    const indexOfReleased = newSiblings.findIndex(s => s.barcode === releasedEntity);
-    const releaseOffsetPredicate = (indexOfReleased >= 0)
-                                  ? (y: number, index: number) => { return y + ((index > indexOfReleased) ? 75 : 0) }
-                                  : (y: number, _i: number) => { return y };
-
+  /*
+    TODO: handling dropping on self.
+          Right now it gets shifted down if you drop on self.
+          if we offset with height we get bugs with dropping outside of current container
+          - maybe an isDroppingOnSelf(): boolean -> dont change index
+          - maybe build rectangles between middle of each element in sibling list and check if pointer
+            is inside one of the rectangles.
+  */
+  private static calculateNewIndex(releasedPosition: ScreenPosition, newSiblings: DisplayStorageEntity[]): number {
     const siblingCount = newSiblings.length;
     for (let i = 0; i < siblingCount; i++) {
-      const siblingOverNative = (i > 0 && i < siblingCount) ? newSiblings[i - 1].containerElementRefCache.nativeElement : null;
-      const siblingUnderNative = newSiblings[i].containerElementRefCache.nativeElement;
-
-      const siblingOverBound = siblingOverNative?.getBoundingClientRect();
-      const siblingUnderBound = siblingUnderNative.getBoundingClientRect();
-
-      const underOverSibling = !siblingOverBound || releasedPosition.y > releaseOffsetPredicate(siblingOverBound.y, i) - siblingOverBound.height * 0.45;
-      const overUnderSibling = releasedPosition.y < releaseOffsetPredicate(siblingUnderBound.y, i) + siblingUnderBound.height;
-
-      if (underOverSibling && overUnderSibling) {
+      const siblingNative = newSiblings[i].containerElementRefCache.nativeElement;
+      const siblingBound  = siblingNative.getBoundingClientRect();
+      const overSibling   = releasedPosition.y < siblingBound.y;
+      if (overSibling) {
         return i;
       }
     }
