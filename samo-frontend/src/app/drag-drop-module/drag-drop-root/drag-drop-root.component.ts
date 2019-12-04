@@ -1,19 +1,16 @@
-import {Component, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DisplayStorageEntity, StorageEntity, StorageEntityMeta, UtilityStorageEntity} from "../model/storage-entity";
 import {EntityType} from "../model/entity-type.enum";
 import {CdkDragDrop, CdkDragMove, moveItemInArray, transferArrayItem,} from "@angular/cdk/drag-drop";
 import {ScreenPosition} from "../model/screen-position";
 import {DropBehaviourData} from "../model/drop-behaviour-data";
 import {MatSidenav} from "@angular/material/sidenav";
-import {NewStorageEntityComponent} from "./new-storage-entity/new-storage-entity.component";
-import {MatDialog} from "@angular/material/dialog";
 import {WebSocketService} from "../web-socket/web-socket.service";
 import {EntityWsEvent} from "../model/entity-ws-event";
 import {takeUntil} from "rxjs/operators";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Subject} from "rxjs";
 import {cdkEventIntoNodeChange, NodeChange} from "../model/node-change-event";
-import {NewEntityAction, NewEntityDialogData} from "../model/new-entity-dialog-data";
 
 // TODO: rewrite web socket sync logic to ignore sort only events
 @Component({
@@ -192,9 +189,6 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
     this.drawer
       .open('program')
       .catch(err => console.error('failed to open drawer, error: ' + err)); // TODO: handle?
-  }
-
-  onNewEntityClicked() {
   }
 
   private findNode(targetBarcode: string, currentTreeNode: DisplayStorageEntity): DisplayStorageEntity | null {

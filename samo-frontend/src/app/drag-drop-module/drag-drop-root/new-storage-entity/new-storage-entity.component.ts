@@ -1,16 +1,18 @@
-import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
+import {Component, ElementRef, Inject, OnDestroy, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from "../../model/new-entity-dialog-data";
 import {StorageEntity} from "../../model/storage-entity";
 import {EntityType} from "../../model/entity-type.enum";
 import {DOCUMENT} from "@angular/common";
+import {Subject} from "rxjs";
+import {delay, takeUntil} from "rxjs/operators";
 
 @Component({
   selector: 'app-new-storage-entity',
   templateUrl: './new-storage-entity.component.html',
   styleUrls: ['./new-storage-entity.component.css']
 })
-export class NewStorageEntityComponent {
+export class NewStorageEntityComponent implements OnDestroy {
 
   public data: NewEntityDialogData = {
     alias: '',
@@ -26,11 +28,31 @@ export class NewStorageEntityComponent {
 
   @ViewChild('inputImport', {static: false}) inputImport: ElementRef;
 
+  private readonly BARCODE_SPEED = 15;
+  private readonly DESTROYED$ = new Subject<void>();
+
+  private lastImportTargetChange: number;
+  private timeBetweenSum: number;
+  private scheduleImport$: Subject<void>;
+
   constructor(public dialogRef: MatDialogRef<NewStorageEntityComponent>,
               @Inject(DOCUMENT) public document,
               @Inject(MAT_DIALOG_DATA) public config: NewEntityDialogConfig) {
-    this.importTargetBarcode = '';
-    this.data.alias = config.alias;
+
+    this.importTargetBarcode    = '';
+    this.data.alias             = config.alias;
+    this.scheduleImport$        = new Subject<void>();
+
+    this.scheduleImport$
+      .pipe(
+        delay(300),
+        takeUntil(this.DESTROYED$),
+      ).subscribe(() => this.mockImport());
+  }
+
+  ngOnDestroy(): void {
+    this.DESTROYED$.next();
+    this.DESTROYED$.complete();
   }
 
   onCancelClick(): void {
@@ -43,9 +65,29 @@ export class NewStorageEntityComponent {
     this.dialogRef.close(this.data);
   }
 
+  onImportTargetChange() {
+    if (!this.lastImportTargetChange || this.importTargetBarcode.length < 1) {
+      this.lastImportTargetChange = Date.now();
+      this.timeBetweenSum         = 0;
+    }
+
+    const now = Date.now();
+    const timeBetween = Math.min(now - this.lastImportTargetChange, 10000);
+    this.lastImportTargetChange = now;
+
+    this.timeBetweenSum += timeBetween;
+    const averageTimeBetween = this.timeBetweenSum / this.importTargetBarcode.length;
+    console.log(averageTimeBetween);
+
+    if (averageTimeBetween < this.BARCODE_SPEED) {
+      this.scheduleImport$.next();
+    }
+    // TODO: schedule with rxjs an automatic import if average is low enough
+  }
+
   // TODO: service with backend
   mockImport() {
-    this.inputImport.nativeElement?.focus();
+    this.inputImport?.nativeElement.focus();
 
     if (this.importTargetBarcode.length <= 0) {
       return;

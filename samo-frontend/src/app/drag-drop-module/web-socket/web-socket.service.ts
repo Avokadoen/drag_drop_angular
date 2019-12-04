@@ -33,6 +33,7 @@ export class WebSocketService implements OnDestroy{
     // We don't lazy load this as we always want this connection if the service lives
     this.RX_STOMP.watch('/stomp_broker/work_area').pipe(
       map<any, EntityWsEvent>(function (message) {
+        // always use JSON.parse for optimization
         return JSON.parse(message.body);
       }),
       takeUntil(this.DESTROYED$)
