@@ -1,5 +1,5 @@
-Samo:
-  testObjectCount: 10000
+samo:
+  optidevApiUrl: http://akselhj.nb.no:8080/api
 
 server:
   port: 8082

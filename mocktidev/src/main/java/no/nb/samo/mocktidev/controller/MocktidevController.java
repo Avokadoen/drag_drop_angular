@@ -1,10 +1,13 @@
 package no.nb.samo.mocktidev.controller;
 
 import no.nb.samo.mocktidev.model.Entity;
+import no.nb.samo.mocktidev.model.EntityReverse;
 import no.nb.samo.mocktidev.model.EntityType;
 import no.nb.samo.mocktidev.model.PlainEntity;
 import no.nb.samo.mocktidev.service.EntityService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -32,4 +35,8 @@ public class MocktidevController {
         return entityService.getEntityByBarcode(barcode);
     }
 
+    @GetMapping("/get_with_children/{barcode}")
+    public EntityReverse getWithChildren(@PathVariable String barcode) {
+        return entityService.getEntityWithChildren(barcode);
+    }
 }

@@ -16,6 +16,9 @@ import {MatDividerModule} from "@angular/material/divider";
 import {FormsModule} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
 import {MatDialogModule} from "@angular/material/dialog";
+import {MocktidevService} from "./mocktidev/mocktidev.service";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {StorageRootResolver} from './storage-root-resolver';
 
 
 @NgModule({
@@ -32,18 +35,21 @@ import {MatDialogModule} from "@angular/material/dialog";
     FormsModule,
     MatInputModule,
     MatDialogModule,
+    MatProgressSpinnerModule,
   ],
   declarations: [
     DragDropRootComponent,
     StorageEntityDraggableComponent,
     RemoveSelfPipe,
-    StorageEntityPanelComponent
+    StorageEntityPanelComponent,
   ],
   exports: [
     DragDropRootComponent,
   ],
   providers: [
-    WebSocketService
+    WebSocketService,
+    MocktidevService,
+    StorageRootResolver
   ],
   entryComponents: [StorageEntityPanelComponent]
 })

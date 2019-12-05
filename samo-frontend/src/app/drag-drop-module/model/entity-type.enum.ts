@@ -1,7 +1,8 @@
 export enum EntityType {
-  OBJECT,
+  OBJECT ,
   BOX,
   CRATE,
   PALLET,
   LOCATION,
 }
+

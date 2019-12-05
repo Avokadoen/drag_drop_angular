@@ -29,8 +29,6 @@ public class StorageObjectApiController {
         return new String[] { "Burde", "lastes", "inn", "fra", "f.eks", "brønnøysundregistrene?" };
     }
 
-    // TODO: unit test
-    // TODO: sortBy enum on StorageObject or an upper class
     @GetMapping(path="/getDelivery")
     public Delivery getStorageObject(
             @RequestParam("deliveryId") String deliveryId,
@@ -46,10 +44,6 @@ public class StorageObjectApiController {
         int toIndex = Math.min(fromIndex + pageSize, so.size());
         return new Delivery(deliveryId, so.size(), so.subList(fromIndex, toIndex));
     }
-
-//    @GetMapping(path="/getDeliveries")
-//    public Delivery[] getDeliveries(@RequestParam(value ="organisationNumber", required = false) String organisationNumber) {
-//    }
 
     @PostMapping(path="registerObject")
     public String registerObject(@RequestBody StorageObject so) {

@@ -40,7 +40,6 @@ public class FrontendController {
         return "index";
     }
 
-    // TODO: search for entities
     @GetMapping(value = ENTITY_OVERVIEW_URN)
     public String entityOverview(@CookieValue(value = PAGE_COOKIE, defaultValue = "0") Integer page,
                                  @CookieValue(value = PAGE_SIZE_COOKIE, defaultValue = "10") Integer size,

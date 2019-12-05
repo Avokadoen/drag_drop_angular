@@ -99,6 +99,9 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
         case EntityType.LOCATION:
           this.nodeBackgroundColor = 'rgb(232, 208, 173, opacity)';
           break;
+        default:
+          console.error(`illegal entity type on node ${this.storageNode.barcode}`);
+          break;
       }
     }
   }
@@ -161,7 +164,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   }
 
   public opacityAsCSSStr(opacity: number): string {
-    return this.nodeBackgroundColor.replace('opacity', opacity.toString());
+    return this.nodeBackgroundColor?.replace('opacity', opacity.toString());
   }
 
   public onEntityEnterList(event: CdkDragEnter<DisplayStorageEntity>): void {

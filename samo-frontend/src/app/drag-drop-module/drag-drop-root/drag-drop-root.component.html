@@ -1,5 +1,4 @@
-
-<mat-drawer-container>
+<mat-drawer-container *ngIf="!failedToLoad">
   <mat-drawer #drawer mode="side" opened>
     <!-- TODO: set move event to null in another more robust one-time way"-->
     <app-storage-entity-draggable class="action-segment"

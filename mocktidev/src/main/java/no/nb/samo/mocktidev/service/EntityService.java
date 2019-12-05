@@ -2,10 +2,7 @@ package no.nb.samo.mocktidev.service;
 
 import no.nb.samo.mocktidev.exception.InvalidRequestException;
 import no.nb.samo.mocktidev.exception.UnreachableException;
-import no.nb.samo.mocktidev.model.Entity;
-import no.nb.samo.mocktidev.model.EntityType;
-import no.nb.samo.mocktidev.model.FlattenedEntity;
-import no.nb.samo.mocktidev.model.PlainEntity;
+import no.nb.samo.mocktidev.model.*;
 import no.nb.samo.mocktidev.repository.EntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -13,11 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -37,6 +30,27 @@ public class EntityService {
 
         return entityRepository.findByBarcode(barcode)
                 .orElseThrow(() -> new InvalidRequestException(MessageFormat.format("Could not find entity with barcode: {0}", barcode)));
+    }
+
+    public EntityReverse getEntityWithChildren(final String parentBarcode) {
+        Entity parent = getEntityByBarcode(parentBarcode);
+        EntityReverse reverseParent = new EntityReverse(parent.getType(), parent.getBarcode());
+        Iterable<Entity> allEntities = entityRepository.findAll();
+
+        return findAllWithParent(allEntities, reverseParent);
+    }
+
+    // TODO: make this do a search, not a brute force
+    private EntityReverse findAllWithParent(final Iterable<Entity> allEntities, final EntityReverse parent) {
+        for (Entity e : allEntities) {
+            if (e.getType().ordinal() < parent.getEntityType()) {
+                if (e.getParent() != null && e.getParent().getBarcode().equals(parent.getBarcode())) {
+                    EntityReverse child = new EntityReverse(e);
+                    parent.addChild(findAllWithParent(allEntities, child));
+                }
+            }
+        }
+        return parent;
     }
 
     public Page<FlattenedEntity> flattenEntities(PageRequest pageRequest, String query) {

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DisplayStorageEntity, StorageEntity, StorageEntityMeta, UtilityStorageEntity} from "../model/storage-entity";
 import {EntityType} from "../model/entity-type.enum";
 import {CdkDragDrop, CdkDragMove, moveItemInArray, transferArrayItem,} from "@angular/cdk/drag-drop";
@@ -11,6 +11,7 @@ import {takeUntil} from "rxjs/operators";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Subject} from "rxjs";
 import {cdkEventIntoNodeChange, NodeChange} from "../model/node-change-event";
+import {ActivatedRoute} from "@angular/router";
 
 // TODO: rewrite web socket sync logic to ignore sort only events
 @Component({
@@ -45,67 +46,10 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
 
   @ViewChild('drawer', {static: true}) drawer: MatSidenav;
 
-  storageRoot: DisplayStorageEntity =
-    {
-      barcode: 'Ranamottaj',
-      entityType: EntityType.LOCATION,
-      alias: 'Rana mottak',
-      children: [
-        {
-          barcode: 'pallet1',
-          entityType: EntityType.PALLET,
-          children: [
-            {
-              barcode: 'object1',
-              entityType: EntityType.OBJECT,
-              children: [],
-            },
-            {
-              barcode: 'object2',
-              entityType: EntityType.OBJECT,
-              children: [],
-            }
-          ],
-        },
-        {
-          barcode: 'pallet2',
-          entityType: EntityType.PALLET,
-          children: [
-            {
-              barcode: 'crate1',
-              entityType: EntityType.CRATE,
-              children: [
-                {
-                  barcode: 'object3',
-                  entityType: EntityType.OBJECT,
-                  children: [],
-                },
-                {
-                  barcode: 'box1',
-                  entityType: EntityType.BOX,
-                  children: [
-                    {
-                      barcode: 'object6',
-                      entityType: EntityType.OBJECT,
-                      children: [],
-                    }],
-                }],
-            }],
-        },
-        {
-          barcode: 'object5',
-          entityType: EntityType.OBJECT,
-          children: [],
-        },
-        {
-          barcode: 'object4',
-          entityType: EntityType.OBJECT,
-          children: [],
-        },
-      ],
-    };
+  @Input() storageRoot: DisplayStorageEntity;
 
   currentEntityEvent: CdkDragMove<DisplayStorageEntity> | null;
+  private failedToLoad: boolean;
 
   public get getSimplifiedTree(): StorageEntityMeta[] {
     // We reverse ids here to respect items nesting hierarchy
@@ -115,6 +59,7 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
   }
 
   constructor(private webSocketService: WebSocketService,
+              private route: ActivatedRoute,
               private snackBar: MatSnackBar,) {
   }
 
@@ -124,6 +69,18 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.DESTROYED$)
       ).subscribe((wsEvent: EntityWsEvent) => this.handleWsEvent(wsEvent));
+
+    const resolve = this.route.snapshot.data.samoResponse;
+    if (resolve.errorMessage) {
+      this.snackBar.open('Something went wrong while loading work area','ok', {
+        duration: 20000,
+        verticalPosition: 'top',
+      });
+      this.failedToLoad = true;
+    } else {
+      this.storageRoot = resolve.optidevEntity;
+      this.failedToLoad = false;
+    }
   }
 
   public ngOnDestroy (): void {
