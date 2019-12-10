@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {StorageEntityPanelComponent} from './storage-entity-panel.component';
 
+import { EventListComponent } from './event-list.component';
 
-describe('NewStorageEntityDialogComponent', () => {
-  let component: StorageEntityPanelComponent;
-  let fixture: ComponentFixture<StorageEntityPanelComponent>;
+describe('EventListComponent', () => {
+  let component: EventListComponent;
+  let fixture: ComponentFixture<EventListComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ StorageEntityPanelComponent ]
+      declarations: [ EventListComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(StorageEntityPanelComponent);
+    fixture = TestBed.createComponent(EventListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

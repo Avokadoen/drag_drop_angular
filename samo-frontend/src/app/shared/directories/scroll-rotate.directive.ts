@@ -1,19 +1,16 @@
 import {AfterViewInit, Directive, ElementRef, HostListener} from '@angular/core';
-import {interval, Subscription} from "rxjs";
+import {interval, Subscription} from 'rxjs';
 
 @Directive({
   selector: '[appScrollRotate]'
 })
 export class ScrollRotateDirective implements AfterViewInit {
 
+  constructor(private el: ElementRef) { }
+
   readonly DRAG_DELAY = 1;
   readonly SCROLL_SENSITIVITY = 1;
   readonly FIXED_TIME_STEP_SECONDS = 0.01667; // approximate 60 fps
-
-  // source: https://en.wikipedia.org/wiki/Linear_interpolation
-  static lerp(from: number, to: number, time: number): number {
-    return (1 - time) * from + time * to;
-  }
 
   degreeRotate = 0;
   rotVelocity = 0;
@@ -22,7 +19,10 @@ export class ScrollRotateDirective implements AfterViewInit {
 
   updateSubscription: Subscription;
 
-  constructor(private el: ElementRef) { }
+  // source: https://en.wikipedia.org/wiki/Linear_interpolation
+  static lerp(from: number, to: number, time: number): number {
+    return (1 - time) * from + time * to;
+  }
 
   ngAfterViewInit(): void { }
 
@@ -58,7 +58,7 @@ export class ScrollRotateDirective implements AfterViewInit {
     const dragModifier = (1 + Math.abs(this.startRotVel * 0.1));
 
     // calculate current lerp "position" (between 0 and 1)
-    const lerpValue = Math.min(this.timer/(this.DRAG_DELAY * dragModifier), 1);
+    const lerpValue = Math.min(this.timer / (this.DRAG_DELAY * dragModifier), 1);
 
     // use lerp to decrease velocity towards 0 (this work independent of negative and positive velocity)
     this.rotVelocity = ScrollRotateDirective.lerp(this.startRotVel, 0, lerpValue);

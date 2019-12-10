@@ -1,11 +1,10 @@
 import {Component, ElementRef, Inject, OnDestroy, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from "../../model/new-entity-dialog-data";
-import {StorageEntity} from "../../model/storage-entity";
-import {EntityType} from "../../model/entity-type.enum";
-import {DOCUMENT} from "@angular/common";
-import {Subject} from "rxjs";
-import {delay, takeUntil} from "rxjs/operators";
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from '../../model/new-entity-dialog-data';
+import {EntityType} from '../../model/entity-type.enum';
+import {DOCUMENT} from '@angular/common';
+import {Subject} from 'rxjs';
+import {delay, takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'app-storage-entity-panel',
@@ -16,7 +15,7 @@ export class StorageEntityPanelComponent implements OnDestroy {
 
   public data: NewEntityDialogData = {
     alias: '',
-    newChildren: [],
+    importBarcodes: [],
     action: NewEntityAction.CANCEL,
   };
 
@@ -77,15 +76,12 @@ export class StorageEntityPanelComponent implements OnDestroy {
 
     this.timeBetweenSum += timeBetween;
     const averageTimeBetween = this.timeBetweenSum / this.importTargetBarcode.length;
-    console.log(averageTimeBetween);
 
     if (averageTimeBetween < this.BARCODE_SPEED) {
       this.scheduleImport$.next();
     }
-    // TODO: schedule with rxjs an automatic import if average is low enough
   }
 
-  // TODO: service with backend
   mockImport() {
     this.inputImport?.nativeElement.focus();
 
@@ -93,13 +89,7 @@ export class StorageEntityPanelComponent implements OnDestroy {
       return;
     }
 
-    const newEntity: StorageEntity = {
-      barcode: this.importTargetBarcode,
-      entityType: Math.trunc(Math.random() * this.config.entityType.valueOf()) as EntityType,
-      children: [],
-    };
-
-    this.data.newChildren = this.data.newChildren.concat(newEntity);
+    this.data.importBarcodes = this.data.importBarcodes.concat(this.importTargetBarcode);
 
     this.importTargetBarcode = '';
   }

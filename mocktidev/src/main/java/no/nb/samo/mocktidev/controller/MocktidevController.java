@@ -1,13 +1,8 @@
 package no.nb.samo.mocktidev.controller;
 
-import no.nb.samo.mocktidev.model.Entity;
-import no.nb.samo.mocktidev.model.EntityReverse;
-import no.nb.samo.mocktidev.model.EntityType;
-import no.nb.samo.mocktidev.model.PlainEntity;
+import no.nb.samo.mocktidev.model.*;
 import no.nb.samo.mocktidev.service.EntityService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -20,14 +15,18 @@ public class MocktidevController {
     }
 
     @PostMapping("/create")
-    public Entity create(@RequestParam String barcode, @RequestParam EntityType type, @RequestParam(required = false) Integer parentId) {
-        PlainEntity newEntity = new PlainEntity(type, barcode, parentId);
-        return entityService.create(newEntity);
+    public void create(@RequestBody EntityCreate entity) {
+        entityService.create(entity);
     }
 
-    @PutMapping("/move")
-    public Entity move(@RequestParam Integer entityId, @RequestParam String newParentBarcode) {
-        return entityService.updateParent(entityId, newParentBarcode);
+    @PostMapping("/move")
+    public Entity move(@RequestBody EntityMove entityMove) {
+        return entityService.updateParent(entityMove.getBarcode(), entityMove.getNewParentBarcode());
+    }
+
+    @DeleteMapping("/delete/{barcode}")
+    public void delete(@PathVariable String barcode) {
+        entityService.delete(barcode);
     }
 
     @GetMapping("/get/{barcode}")

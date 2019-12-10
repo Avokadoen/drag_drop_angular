@@ -1,5 +1,4 @@
 <div cdkDropList
-     [cdkDropListAutoScrollDisabled]="true"
      class="entity-drag-list"
      [ngStyle]="{
       'background-color': this.opacityAsCSSStr(0.75),
@@ -9,22 +8,37 @@
      [cdkDropListData]="parentEntity"
      [cdkDropListConnectedTo]="storageNode.barcode | removeSelf: allPossibleEntityRelations"
      (cdkDropListDropped)="onDragDrop($event)">
-
+  <!-- Drag handler. Defines value of what we drag -->
   <div cdkDrag
        [id]="storageNode.barcode"
        [cdkDragData]="storageNode"
        [cdkDragDisabled]="dragDisabled"
        (cdkDragMoved)="onDragMove($event)"
-        fxLayout="row">
-    <div title="Drag this entity and its children"
-         class="entity-drag-handle"
-         (click)="onNewEntityClicked()"
-         cdkDragHandle>
+       fxLayout="row">
+
+    <!-- Area that is draggable -->
+    <div  title="Drag this entity and its children"
+          class="entity-drag-handle"
+          (click)="onNewEntityClicked()"
+          cdkDragHandle
+          fxFlex="grow"
+          fxLayoutGap="25px">
+
       <mat-icon *ngIf="!dragDisabled">
         drag_indicator
       </mat-icon>
       {{getDisplayString}} - {{getEntityTypeString}}
+
+      <!-- button to hide children -->
+      <div fxFlex="grow" dir="rtl" fxLayout="row" fxLayoutGap="40px" *ngIf="!isObjectType">
+        <button mat-button (click)="toggleHidden()">
+          <mat-icon *ngIf="!isHidden">keyboard_arrow_down</mat-icon>
+          <mat-icon *ngIf="isHidden">keyboard_arrow_up</mat-icon>
+        </button>
+      </div>
     </div>
+
+    <!-- element that will be displayed while dragging node -->
     <div
       [id]="storageNode.barcode + 'preview'"
       [ngStyle]="{'background-color': this.opacityAsCSSStr(0.6)}"
@@ -35,9 +49,9 @@
     </div>
   </div>
 
-  <ul *ngIf="!isObjectType"
+  <!-- List of all children of current node -->
+  <ul *ngIf="!isObjectType && !isHidden"
       cdkDropList
-      [cdkDropListAutoScrollDisabled]="true"
       class="entity-drop-zone"
       [id]="storageNode.barcode"
       [ngStyle]="{'background': dropListBackgroundColor}"
@@ -54,7 +68,8 @@
         [dropBehaviourData]="dropBehaviourData"
         [depth]="depth + 1"
         (entityDrop)="onDragDrop($event)"
-        (entityMove)="onDragMove($event)">
+        (entityMove)="onDragMove($event)"
+        (entityImport)="entityImport.emit($event)">
       </app-storage-entity-draggable>
     </li>
   </ul>

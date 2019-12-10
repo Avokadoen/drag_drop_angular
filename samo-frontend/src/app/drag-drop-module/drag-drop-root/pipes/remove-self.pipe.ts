@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {StorageEntityMeta} from "../../model/storage-entity";
+import {StorageEntityMeta} from '../../model/storage-entity';
 
 @Pipe({
   name: 'removeSelf'

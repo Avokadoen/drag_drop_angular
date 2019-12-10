@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GenerateRegisterDeliveryComponent } from './generate-register-delivery.component';
-import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 
 describe('GenerateRegisterDeliveryComponent', () => {
   let component: GenerateRegisterDeliveryComponent;

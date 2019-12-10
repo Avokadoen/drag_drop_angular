@@ -1,5 +1,5 @@
-import {EntityType} from "./entity-type.enum";
-import {ElementRef} from "@angular/core";
+import {EntityType} from './entity-type.enum';
+import {ElementRef} from '@angular/core';
 
 export interface DisplayStorageEntity {
   barcode: string;
@@ -9,6 +9,9 @@ export interface DisplayStorageEntity {
   alias?: string;
 }
 
+/**
+ * can be used for ui elements that has some custom behaviour. i.e delete list
+ */
 export interface UtilityStorageEntity {
   barcode: string;
   entityType: EntityType.LOCATION;
@@ -16,7 +19,6 @@ export interface UtilityStorageEntity {
   containerElementRefCache?: ElementRef<Element>;
   alias?: string;
 }
-
 
 export interface StorageEntity {
   barcode: string;

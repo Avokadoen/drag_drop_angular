@@ -2,9 +2,9 @@ package no.nb.samo.model;
 
 public class EntityWSEvent {
     Integer timestamp;
-    String movingBarcode;
-    String previousParentBarcode;
+    EntityMeta source;
     String newParentBarcode;
+    String currentParentBarcode;
 
     public Integer getTimestamp() {
         return timestamp;
@@ -14,20 +14,12 @@ public class EntityWSEvent {
         this.timestamp = timestamp;
     }
 
-    public String getMovingBarcode() {
-        return movingBarcode;
+    public EntityMeta getSource() {
+        return source;
     }
 
-    public void setMovingBarcode(String movingBarcode) {
-        this.movingBarcode = movingBarcode;
-    }
-
-    public String getPreviousParentBarcode() {
-        return previousParentBarcode;
-    }
-
-    public void setPreviousParentBarcode(String previousParentBarcode) {
-        this.previousParentBarcode = previousParentBarcode;
+    public void setSource(EntityMeta source) {
+        this.source = source;
     }
 
     public String getNewParentBarcode() {
@@ -36,5 +28,13 @@ public class EntityWSEvent {
 
     public void setNewParentBarcode(String newParentBarcode) {
         this.newParentBarcode = newParentBarcode;
+    }
+
+    public String getCurrentParentBarcode() {
+        return currentParentBarcode;
+    }
+
+    public void setCurrentParentBarcode(String currentParentBarcode) {
+        this.currentParentBarcode = currentParentBarcode;
     }
 }

@@ -1,5 +1,7 @@
 <mat-drawer-container *ngIf="!failedToLoad">
   <mat-drawer #drawer mode="side" opened>
+    <!-- TODO: toggle sidenav button in sidenav too -->
+    <h4 class="category-header">Drag drop delete</h4>
     <!-- TODO: set move event to null in another more robust one-time way"-->
     <app-storage-entity-draggable class="action-segment"
                                   [storageNode]="DELETE_NODE"
@@ -8,11 +10,16 @@
                                   [overwriteNodeColor]="'rgb(243, 115, 111, opacity)'"
                                   [depth]="0"
                                   (entityMove)="onDragMove(null)"
-                                  (entityDrop)="onDragDrop($event)">
+                                  (entityDrop)="onDragDrop($event)"
+                                  (entityImport)="onImportNodeRequest($event)">
     </app-storage-entity-draggable>
+    <mat-divider></mat-divider>
+    <h4 class="category-header">Event list</h4>
+    <app-event-list></app-event-list>
   </mat-drawer>
 
-  <div class="example-sidenav-content">
+  <!-- TODO: virtual scroll -->
+  <div class="sidenav-content">
     <button class="mat-primary" mat-button
             (click)="drawer.toggle()"
             (mouseover)="onMouseOverToggleNav()">
@@ -26,7 +33,8 @@
       [dropBehaviourData]="DROP_MOVE_DATA"
       [depth]="0"
       (entityDrop)="onDragDrop($event)"
-      (entityMove)="onDragMove($event)">
+      (entityMove)="onDragMove($event)"
+      (entityImport)="onImportNodeRequest($event)">
     </app-storage-entity-draggable>
   </div>
 </mat-drawer-container>

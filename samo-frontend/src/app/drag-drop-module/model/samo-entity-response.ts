@@ -1,6 +1,6 @@
-import {StorageEntity} from "./storage-entity";
+import {StorageEntity} from './storage-entity';
 
 export interface SamoEntityResponse {
-  optidevEntity: StorageEntity | null
+  optidevEntity: StorageEntity | null;
   errorMessage: string;
 }

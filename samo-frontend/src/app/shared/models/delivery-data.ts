@@ -1,4 +1,4 @@
-import {StorageObjectData} from "./storage-object-data";
+import {StorageObjectData} from './storage-object-data';
 
 export interface DeliveryData {
   deliveryId: string;

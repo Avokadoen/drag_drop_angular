@@ -1,5 +1,4 @@
-import {StorageEntity} from "./storage-entity";
-import {EntityType} from "./entity-type.enum";
+import {EntityType} from './entity-type.enum';
 
 export interface NewEntityDialogConfig {
   alias: string;
@@ -9,7 +8,7 @@ export interface NewEntityDialogConfig {
 export interface NewEntityDialogData {
   action: NewEntityAction;
   alias: string;
-  newChildren: StorageEntity[];
+  importBarcodes: string[];
 }
 
 export enum NewEntityAction {

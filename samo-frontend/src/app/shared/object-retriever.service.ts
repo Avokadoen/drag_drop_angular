@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import {StorageObjectData} from './models/storage-object-data';
 import {Observable, throwError} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {environment} from "../../environments/environment";
-import {DeliveryData} from "./models/delivery-data";
-import {catchError, retry, retryWhen} from "rxjs/operators";
+import {environment} from '../../environments/environment';
+import {DeliveryData} from './models/delivery-data';
+import {catchError, retry, retryWhen} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +56,7 @@ export class ObjectRetrieverService {
   // source: https://www.positronx.io/angular-7-httpclient-http-service/
   handleError(error) {
     let errorMessage = '';
-    if(error.error instanceof ErrorEvent) {
+    if (error.error instanceof ErrorEvent) {
       // Get client-side error
       errorMessage = error.error.message;
     } else {

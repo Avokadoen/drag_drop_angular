@@ -1,5 +1,4 @@
 # SamoPrototype
-
 Prototype for the SAMO internal app
 
 ## Development server

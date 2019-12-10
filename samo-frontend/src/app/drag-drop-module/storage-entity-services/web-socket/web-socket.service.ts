@@ -1,15 +1,15 @@
 import {Injectable, OnDestroy} from '@angular/core';
-import {RxStomp} from "@stomp/rx-stomp";
-import {EntityWsEvent} from "../model/entity-ws-event";
-import {NodeChange} from "../model/node-change-event";
-import {map, takeUntil} from "rxjs/operators";
-import {Subject} from "rxjs";
-import {environment} from "../../../environments/environment";
+import {RxStomp} from '@stomp/rx-stomp';
+import {EntityWsEvent} from '../../model/entity-ws-event';
+import {NodeChange} from '../../model/node-change-event';
+import {map, takeUntil} from 'rxjs/operators';
+import {Subject} from 'rxjs';
+import {environment} from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WebSocketService implements OnDestroy{
+export class WebSocketService implements OnDestroy {
 
   private readonly RX_STOMP = new RxStomp();
   private readonly DESTROYED$ = new Subject();
@@ -18,6 +18,10 @@ export class WebSocketService implements OnDestroy{
   private timestampCollection: number[] = [0, 0, 0, 0, 0];
 
   readonly CHANGE$ = new Subject<EntityWsEvent>();
+  readonly CREATED$ = new Subject<EntityWsEvent>();
+
+  private readonly MOVE_URI = '/app/storage_entity_move';
+  private readonly CREATE_URI = '/app/storage_entity_create';
 
   // TODO: have a request change observer function where we lazy load a new watch if we don't have given url
   // i.e: getObserverFor(url: string)
@@ -31,8 +35,8 @@ export class WebSocketService implements OnDestroy{
     this.RX_STOMP.activate();
 
     // We don't lazy load this as we always want this connection if the service lives
-    this.RX_STOMP.watch('/stomp_broker/work_area').pipe(
-      map<any, EntityWsEvent>(function (message) {
+    this.RX_STOMP.watch('/stomp_broker/work_area_move').pipe(
+      map<any, EntityWsEvent>((message) => {
         // always use JSON.parse for optimization
         return JSON.parse(message.body);
       }),
@@ -43,6 +47,18 @@ export class WebSocketService implements OnDestroy{
       }
       this.CHANGE$.next(payload);
     });
+
+    this.RX_STOMP.watch('/stomp_broker/work_area_create').pipe(
+      map<any, EntityWsEvent>((message) => {
+        return JSON.parse(message.body);
+      }),
+      takeUntil(this.DESTROYED$)
+    ).subscribe((payload: EntityWsEvent) => {
+      if (this.isSelfSentEvent(payload.timestamp)) {
+        return;
+      }
+      this.CREATED$.next(payload);
+    });
   }
 
   ngOnDestroy(): void {
@@ -50,15 +66,23 @@ export class WebSocketService implements OnDestroy{
     this.DESTROYED$.complete();
   }
 
-  sendChange(change: NodeChange) {
+  sendMove(movingEntity: NodeChange) {
+    this.sendWsEvent(movingEntity, this.MOVE_URI);
+  }
+
+  sendCreate(newEntity: NodeChange) {
+    this.sendWsEvent(newEntity, this.CREATE_URI);
+  }
+
+  private sendWsEvent(event: NodeChange, uri: string) {
     const parsedEvent: EntityWsEvent = {
       timestamp:              this.createTimestamp(),
-      movingBarcode:          change.movingEntity.barcode,
-      previousParentBarcode:  change.currentParent.barcode,
-      newParentBarcode:       change.newParent.barcode,
+      source:                 { barcode: event.movingEntity.barcode, entityType: event.movingEntity.entityType },
+      currentParentBarcode:   event.currentParent?.barcode,
+      newParentBarcode:       event.newParent.barcode,
     };
 
-    this.RX_STOMP.publish({destination: '/app/storage_entity_change', body: JSON.stringify(parsedEvent)});
+    this.RX_STOMP.publish({destination: uri, body: JSON.stringify(parsedEvent)});
   }
 
   private createTimestamp(): number {

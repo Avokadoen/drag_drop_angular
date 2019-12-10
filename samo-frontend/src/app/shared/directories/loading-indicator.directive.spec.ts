@@ -1,11 +1,11 @@
 import { LoadingIndicatorDirective } from './loading-indicator.directive';
-import {async, TestBed} from "@angular/core/testing";
-import {ElementRef} from "@angular/core";
+import {async, TestBed} from '@angular/core/testing';
+import {ElementRef} from '@angular/core';
 
 beforeEach(async(() => {
   TestBed.configureTestingModule({
     providers: [
-      //more providers
+      // more providers
       { provide: ElementRef, useClass: MockElementRef }
     ]
   }).compileComponents();

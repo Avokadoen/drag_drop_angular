@@ -1,8 +1,7 @@
 package no.nb.samo.model;
-// TODO: rename, used in frontend
-public class StorageEntity {
+
+public class EntityMeta {
     String barcode;
-    StorageEntity[] children;
     int entityType;
 
     public String getBarcode() {
@@ -11,14 +10,6 @@ public class StorageEntity {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
-    }
-
-    public StorageEntity[] getChildren() {
-        return children;
-    }
-
-    public void setChildren(StorageEntity[] children) {
-        this.children = children;
     }
 
     public int getEntityType() {

@@ -35,7 +35,6 @@ public class MocktidevInterfaceController {
         if (entity.getEntityType() != EntityType.LOCATION.ordinal()) {
             return getResponseEntity(null, HttpStatus.BAD_REQUEST,"entity {0} was of type {1}, not of type LOCATION!", locationBarcode, entity.getEntityType());
         }
-
         return getResponseEntity(entity, HttpStatus.OK,null);
     }
 

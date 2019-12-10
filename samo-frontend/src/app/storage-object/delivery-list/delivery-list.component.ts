@@ -4,12 +4,12 @@ import {partialCreateStorageObjectData, StorageObjectData} from '../../shared/mo
 import {ObjectRetrieverService} from '../../shared/object-retriever.service';
 import {ControlFormComponent} from '../control-form/control-form.component';
 import {ActivatedRoute} from '@angular/router';
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {catchError, map, mergeMap, startWith, switchMap} from "rxjs/operators";
-import {merge, Observable} from "rxjs";
-import {PageEvent} from "@angular/material/paginator";
-import {BreakpointObserver} from "@angular/cdk/layout";
-import {isEqual} from "../../shared/functions/equality";
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {catchError, map, mergeMap, startWith, switchMap} from 'rxjs/operators';
+import {merge, Observable} from 'rxjs';
+import {PageEvent} from '@angular/material/paginator';
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {isEqual} from '../../shared/functions/equality';
 
 /* sources:
 * mobile friendly table: https://stackblitz.com/edit/angular-mohmt5-y88uhq?file=app%2Ftable-basic-example.ts
@@ -66,12 +66,12 @@ export class DeliveryListComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.route.params.subscribe(params => {
       this.deliveryId = params.id;
-      this.paginator.page.emit(new PageEvent())
+      this.paginator.page.emit(new PageEvent());
     });
 
     const checkBoxEvents = this.checkboxes.map(check => check.change.asObservable());
     merge(... checkBoxEvents).subscribe(change  => {
-      this.updateDisplayColumns(change)
+      this.updateDisplayColumns(change);
     });
     // TODO: backend sort
     // this.dataSource.sort = this.sort;
@@ -79,7 +79,7 @@ export class DeliveryListComponent implements AfterViewInit {
       startWith({}),
       switchMap(() => {
         this.isLoadingResults = true;
-        return this.objectRetrieverService.getDeliveryBatch(this.deliveryId, this.paginator.pageIndex, this.paginator.pageSize)
+        return this.objectRetrieverService.getDeliveryBatch(this.deliveryId, this.paginator.pageIndex, this.paginator.pageSize);
       }),
       map(data => {
         this.paginator.length = data.objectCount;
@@ -97,7 +97,7 @@ export class DeliveryListComponent implements AfterViewInit {
     ).subscribe(data => {
       this.isLoadingResults = false;
       if (data) {
-        this.dataSource.data = data
+        this.dataSource.data = data;
       }
     });
   }
@@ -146,7 +146,7 @@ export class DeliveryListComponent implements AfterViewInit {
         const oldSO = this.dataSource.data[refIndex];
         this.dataSource.data[refIndex] = newSO;
         this.dataSource._updateChangeSubscription();
-        return this.objectRetrieverService.updateObject(oldSO, (<StorageObjectData>newSO));
+        return this.objectRetrieverService.updateObject(oldSO, (newSO as StorageObjectData));
       })
       ).subscribe(e => console.log(e));
   }
@@ -166,11 +166,11 @@ export class DeliveryListComponent implements AfterViewInit {
 
     dialogRef.afterClosed().pipe(
       mergeMap(newSO => {
-        if (!(<StorageObjectData>newSO)) {
+        if (!(newSO as StorageObjectData)) {
           return new Observable<void>();
         }
         console.log(newSO);
-        return this.objectRetrieverService.registerObject((<StorageObjectData>newSO));
+        return this.objectRetrieverService.registerObject((newSO as StorageObjectData));
       }),
       catchError(err => err),
     ).subscribe(result => {

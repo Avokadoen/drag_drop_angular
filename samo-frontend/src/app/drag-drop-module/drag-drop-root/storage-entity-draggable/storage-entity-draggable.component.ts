@@ -1,14 +1,15 @@
-import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output,} from '@angular/core';
-import {CdkDragDrop, CdkDragEnter, CdkDragMove} from "@angular/cdk/drag-drop";
-import {DisplayStorageEntity, StorageEntityMeta} from "../../model/storage-entity";
-import {interval} from "rxjs";
-import {endWith, map, startWith, take} from "rxjs/operators";
-import {DropBehaviourData} from "../../model/drop-behaviour-data";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {MatDialog} from "@angular/material/dialog";
-import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from "../../model/new-entity-dialog-data";
-import {EntityType} from "../../model/entity-type.enum";
-import {StorageEntityPanelComponent} from "../storage-entity-panel/storage-entity-panel.component";
+import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, } from '@angular/core';
+import {CdkDragDrop, CdkDragEnter, CdkDragMove} from '@angular/cdk/drag-drop';
+import {DisplayStorageEntity, StorageEntityMeta} from '../../model/storage-entity';
+import {interval} from 'rxjs';
+import {endWith, map, startWith, take} from 'rxjs/operators';
+import {DropBehaviourData} from '../../model/drop-behaviour-data';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatDialog} from '@angular/material/dialog';
+import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from '../../model/new-entity-dialog-data';
+import {EntityType} from '../../model/entity-type.enum';
+import {StorageEntityPanelComponent} from '../storage-entity-panel/storage-entity-panel.component';
+import {EntityImportEvent} from '../../model/entity-import-event';
 
 // Sources: code is heavily based on Ilya Pakhomov's code that can be found here:
 // https://stackblitz.com/edit/angular-cdk-nested-drag-drop-demo
@@ -18,19 +19,6 @@ import {StorageEntityPanelComponent} from "../storage-entity-panel/storage-entit
   styleUrls: ['./storage-entity-draggable.component.scss', '../drag-drop-root.component.scss']
 })
 export class StorageEntityDraggableComponent implements OnChanges, OnInit, AfterViewInit {
-
-  readonly ILLEGAL_MOVE_COLOR = 'rgb(230, 20, 20, 0.6)';
-  private readonly ROOT_NODE = 'rootNode';
-
-  @Input() parentEntity?: DisplayStorageEntity;
-  @Input() storageNode: DisplayStorageEntity;
-  @Input() allPossibleEntityRelations: StorageEntityMeta[];
-  @Input() dropBehaviourData: DropBehaviourData;
-  @Input() depth: number;
-  @Input() overwriteNodeColor?: string;
-
-  @Output() entityMove: EventEmitter<CdkDragMove<DisplayStorageEntity>>;
-  @Output() entityDrop: EventEmitter<CdkDragDrop<DisplayStorageEntity>>;
 
   public get dragDisabled(): boolean {
     return !this.parentEntity;
@@ -44,19 +32,12 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
       return this.countChildren(this.storageNode);
   }
 
-  // TODO: do we want shallow child count?
-  public countChildren(storageNode: DisplayStorageEntity): number {
-    let count = storageNode.children.length;
-    for (let child of storageNode.children) {
-      if (child.children.length > 0) {
-        count += this.countChildren(child);
-      }
-    }
-    return count;
-  }
-
   public get isObjectType(): boolean {
     return this.storageNode.entityType === EntityType.OBJECT;
+  }
+
+  public get isHidden(): boolean {
+    return this.hidden;
   }
 
   public get getEntityTypeString(): string {
@@ -67,16 +48,46 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     return this.storageNode.alias ?? this.storageNode.barcode;
   }
 
+  readonly ILLEGAL_MOVE_COLOR = 'rgb(230, 20, 20, 0.6)';
+  private readonly ROOT_NODE = 'rootNode';
+
+  @Input() parentEntity?: DisplayStorageEntity;
+  @Input() storageNode: DisplayStorageEntity;
+  @Input() allPossibleEntityRelations: StorageEntityMeta[];
+  @Input() dropBehaviourData: DropBehaviourData;
+  @Input() depth: number;
+  @Input() overwriteNodeColor?: string;
+
+  @Output() entityMove: EventEmitter<CdkDragMove<DisplayStorageEntity>>;
+  @Output() entityDrop: EventEmitter<CdkDragDrop<DisplayStorageEntity>>;
+  @Output() entityImport: EventEmitter<EntityImportEvent>;
+
   private nodeBackgroundColor: string;
   private dropListBackgroundColor: string;
   private formattedDescription: string;
   private listMargin: string;
-  private prevParentId: string = '';
+  private prevParentId: string;
+  private hidden: boolean;
 
-  constructor(private _snackBar: MatSnackBar,
-              public _addEntityDialog: MatDialog) {
-    this.entityDrop = new EventEmitter<CdkDragDrop<DisplayStorageEntity>>();
-    this.entityMove = new EventEmitter<CdkDragMove<DisplayStorageEntity>>();
+  constructor(private snackBar: MatSnackBar,
+              public addEntityDialog: MatDialog) {
+    this.entityDrop   = new EventEmitter<CdkDragDrop<DisplayStorageEntity>>();
+    this.entityMove   = new EventEmitter<CdkDragMove<DisplayStorageEntity>>();
+    this.entityImport = new EventEmitter<EntityImportEvent>();
+
+    this.prevParentId = '';
+    this.hidden       = false;
+  }
+
+  // TODO: do we want shallow child count?
+  public countChildren(storageNode: DisplayStorageEntity): number {
+    let count = storageNode.children.length;
+    for (const child of storageNode.children) {
+      if (child.children.length > 0) {
+        count += this.countChildren(child);
+      }
+    }
+    return count;
   }
 
   ngOnInit(): void {
@@ -100,11 +111,11 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
           this.nodeBackgroundColor = 'rgb(232, 208, 173, opacity)';
           break;
         default:
-          console.error(`illegal entity type on node ${this.storageNode.barcode}`);
+          console.error(`illegal entity type on node ${this.storageNode.barcode}, state: ${this.storageNode.entityType}`);
           break;
-      }
     }
   }
+}
 
   ngOnChanges() {
     // update table
@@ -141,11 +152,11 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
       this.entityMove.emit(null);
       interval(140).pipe(
         take(3),
-        map(n => (n % 2 == 0) ? this.ILLEGAL_MOVE_COLOR : ''),
+        map(n => (n % 2 === 0) ? this.ILLEGAL_MOVE_COLOR : ''),
         startWith(''),
         endWith(''),
       ).subscribe( c => {
-        this.dropListBackgroundColor = c
+        this.dropListBackgroundColor = c;
       });
     }
   }
@@ -184,7 +195,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
       .replace('{0}', EntityType[movedType].toLocaleLowerCase())
       .replace('{1}', EntityType[targetType].toLocaleLowerCase());
 
-    this._snackBar.open( errMsg,'ok', {
+    this.snackBar.open( errMsg, 'ok', {
       data: 'Insert an id that exist in (m)optidev',
       duration: 5500,
       verticalPosition: 'top',
@@ -195,7 +206,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   onNewEntityClicked() {
     const dialogConfig: NewEntityDialogConfig = this.storageNode as NewEntityDialogConfig;
 
-    const dialogRef = this._addEntityDialog.open(StorageEntityPanelComponent, {
+    const dialogRef = this.addEntityDialog.open(StorageEntityPanelComponent, {
       minWidth: '300px',
       maxWidth: '1000px',
       width: '25vh',
@@ -203,18 +214,30 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     });
 
     dialogRef.afterClosed().subscribe((result: NewEntityDialogData) => {
-      if (result?.action == NewEntityAction.SUBMIT) {
+      if (result?.action === NewEntityAction.SUBMIT) {
+
         if (result.alias) {
           this.storageNode.alias = result.alias;
         }
-        if (result.newChildren) {
-          this.storageNode.children = this.storageNode.children.concat(result.newChildren as DisplayStorageEntity[]);
+
+        if (result.importBarcodes) {
+          const importEvent: EntityImportEvent = {
+            source: this.storageNode,
+            importBarcodes: result.importBarcodes,
+          };
+
+          this.entityImport.emit(importEvent);
         }
+
       }
     });
   }
 
   childTrackByFn(index: number, child: DisplayStorageEntity): string {
-    return child.barcode+index;
+    return child.barcode + index;
+  }
+
+  toggleHidden() {
+    this.hidden = !this.hidden;
   }
 }

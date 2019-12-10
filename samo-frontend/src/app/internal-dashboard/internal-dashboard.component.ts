@@ -1,13 +1,13 @@
 import {Component, OnInit, Pipe, PipeTransform, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {MatTableDataSource} from "@angular/material/table";
-import {ObjectRetrieverService} from "../shared/object-retriever.service";
-import {catchError, map, startWith, switchMap} from "rxjs/operators";
-import {from, Observable} from "rxjs";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {FormControl} from "@angular/forms";
-import {MatDrawer} from "@angular/material/sidenav";
-import {DeliveryOverviewData} from "../shared/models/delivery-data";
+import {ActivatedRoute, Router} from '@angular/router';
+import {MatTableDataSource} from '@angular/material/table';
+import {ObjectRetrieverService} from '../shared/object-retriever.service';
+import {catchError, map, startWith, switchMap} from 'rxjs/operators';
+import {from, Observable} from 'rxjs';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {FormControl} from '@angular/forms';
+import {MatDrawer} from '@angular/material/sidenav';
+import {DeliveryOverviewData} from '../shared/models/delivery-data';
 
 @Component({
   selector: 'app-internal-dashboard',
@@ -15,7 +15,7 @@ import {DeliveryOverviewData} from "../shared/models/delivery-data";
   styleUrls: ['./internal-dashboard.component.css']
 })
 export class InternalDashboardComponent implements OnInit {
-  readonly tableData : DeliveryOverviewData[] = [
+  readonly tableData: DeliveryOverviewData[] = [
     {
       organisationId: 'burde',
       deliveryId: 'test',
@@ -103,7 +103,7 @@ export class InternalDashboardComponent implements OnInit {
       // TODO: actually handle error
       catchError(err => {
         console.log(err);
-        return new Observable<void>(); 
+        return new Observable<void>();
       })
     );
   }

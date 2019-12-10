@@ -1,19 +1,25 @@
 <div mat-dialog-content fxLayout="column">
   <mat-form-field floatLabel="auto" fxFlex="grow">
     <mat-label>Create an alias for entity</mat-label>
-    <input matInput [(ngModel)]="data.alias">
+    <label>
+      <input matInput [(ngModel)]="data.alias">
+    </label>
   </mat-form-field>
   <mat-divider></mat-divider>
   <div *ngIf="canHaveChildren" fxLayout="column">
-    <div *ngFor="let child of data.newChildren">
+    <div *ngFor="let child of data.importBarcodes">
       <mat-form-field floatLabel="auto" fxFlex="grow">
         <mat-label>Imported storage entity</mat-label>
-        <input matInput [(ngModel)]="child.barcode" disabled>
+        <label>
+          <input matInput [(ngModel)]="child" disabled>
+        </label>
       </mat-form-field>
     </div>
     <mat-form-field floatLabel="always" fxFlex="grow">
       <mat-label>Import storage entity by barcode</mat-label>
-      <input (ngModelChange)="onImportTargetChange()" matInput #inputImport [(ngModel)]="importTargetBarcode">
+      <label>
+        <input (ngModelChange)="onImportTargetChange()" matInput #inputImport [(ngModel)]="importTargetBarcode">
+      </label>
     </mat-form-field>
     <button mat-button class="mat-primary" (click)="mockImport()">Import</button>
   </div>

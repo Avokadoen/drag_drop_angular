@@ -5,6 +5,7 @@ ul, li {
   padding-top: 10px;
   padding-left: 0;
   padding-bottom: 10px;
+  min-width: 120px;
 }
 
 .entity {
@@ -16,7 +17,6 @@ ul, li {
 
   &-drag {
     &-handle {
-      width: 100%;
       min-height: 75px;
       display: inline-flex;
       align-items: center;

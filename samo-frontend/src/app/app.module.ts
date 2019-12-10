@@ -22,17 +22,17 @@ import { GenerateRegisterDeliveryComponent } from './storage-object/generate-reg
 import {RouterModule, Routes} from '@angular/router';
 import { NotFoundPageComponent } from './fixed-elements/not-found-page/not-found-page.component';
 import {ObjectRetrieverService} from './shared/object-retriever.service';
-import {HttpClientModule} from "@angular/common/http";
-import {MatSnackBarModule} from "@angular/material/snack-bar";
-import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {HttpClientModule} from '@angular/common/http';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { InternalDashboardComponent } from './internal-dashboard/internal-dashboard.component';
-import {MatDividerModule} from "@angular/material/divider";
-import {MatExpansionModule} from "@angular/material/expansion";
-import {MatListModule} from "@angular/material/list";
-import {MatSidenavModule} from "@angular/material/sidenav";
+import {MatDividerModule} from '@angular/material/divider';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatListModule} from '@angular/material/list';
+import {MatSidenavModule} from '@angular/material/sidenav';
 import { ReactiveTestComponent } from './reactive-test/reactive-test.component';
-import {CommonModule} from "@angular/common";
+import {CommonModule} from '@angular/common';
 import { StringFilterPipe } from './shared/pipes/string-filter.pipe';
 import { HttpTableComponent } from './shared/components/http-table/http-table.component';
 import { SelectTableRowArrayPipe } from './shared/pipes/select-table-row-array.pipe';
@@ -41,8 +41,8 @@ import { HoverFocusDirective } from './shared/directories/hover-focus.directive'
 import { LoadingIndicatorDirective } from './shared/directories/loading-indicator.directive';
 import { H3IconAlignDirective } from './shared/directories/h3-icon-align.directive';
 import { ScrollRotateDirective } from './shared/directories/scroll-rotate.directive';
-import {WebSocketService} from "./drag-drop-module/web-socket/web-socket.service";
-import {EntityDragDropModule} from "./drag-drop-module/entity-drag-drop.module";
+import {WebSocketService} from './drag-drop-module/storage-entity-services/web-socket/web-socket.service';
+import {EntityDragDropModule} from './drag-drop-module/entity-drag-drop.module';
 import { appRouting } from './app.routing';
 
 

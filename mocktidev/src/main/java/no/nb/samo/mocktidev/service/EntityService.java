@@ -95,6 +95,11 @@ public class EntityService {
         return new PageImpl<>(pagedEntities, pageRequest, flattenedEntityList.size());
     }
 
+    public Entity updateParent(String barcode, String newParentBarcode) {
+        Entity entity = getEntityByBarcode(barcode);
+        return updateParent(entity.getId(), newParentBarcode);
+    }
+
     public Entity updateParent(int entityId, String newParentBarcode) {
         validateBarcode(newParentBarcode);
 
@@ -126,6 +131,11 @@ public class EntityService {
         return workingEntity;
     }
 
+    public void delete(String barcode) {
+        Entity entity = getEntityByBarcode(barcode);
+        delete(entity.getId());
+    }
+
     public void delete(int entityId) {
         long count = StreamSupport.stream(entityRepository.findAll().spliterator(), false)
                 .filter(e -> (e.getParent() != null && e.getParent().getId().equals(entityId)))
@@ -135,7 +145,13 @@ public class EntityService {
         }
         entityRepository.deleteById(entityId);
     }
-    
+
+    public Entity create(EntityCreate entityCreate) {
+        Entity parent = entityRepository.findByBarcode(entityCreate.getParentBarcode()).orElseThrow(() -> new RuntimeException("failed to find parent"));
+        EntityType entityType = EntityType.values()[entityCreate.getType()];
+        return create(new PlainEntity(entityType, entityCreate.getBarcode(), parent.getId()));
+    }
+
     public Entity create(PlainEntity plainEntity) {
         validateBarcode(plainEntity.getBarcode());
 

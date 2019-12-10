@@ -1,14 +1,14 @@
 import {Component, EventEmitter, HostListener, Input, OnInit, Output, ViewChild, ViewChildren} from '@angular/core';
-import {MatTableDataSource} from "@angular/material/table";
-import {MatPaginator, PageEvent} from "@angular/material/paginator";
-import {MatSort} from "@angular/material/sort";
-import {MatCheckbox} from "@angular/material/checkbox";
-import {MatDialog} from "@angular/material/dialog";
-import {ObjectRetrieverService} from "../../object-retriever.service";
-import {ActivatedRoute} from "@angular/router";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {BreakpointObserver} from "@angular/cdk/layout";
-import {SelectTableRowArrayPipe} from "../../pipes/select-table-row-array.pipe";
+import {MatTableDataSource} from '@angular/material/table';
+import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {MatDialog} from '@angular/material/dialog';
+import {ObjectRetrieverService} from '../../object-retriever.service';
+import {ActivatedRoute} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {SelectTableRowArrayPipe} from '../../pipes/select-table-row-array.pipe';
 
 // TODO: refactor 2 arrays required to display table using pipe, if this was called in html we
 //  would have pipe in 3 different locations in the html
@@ -58,7 +58,7 @@ export class HttpTableComponent<T> implements OnInit {
   @ViewChildren(MatCheckbox)
   checkboxes: MatCheckbox[];
 
-  isLoadingResults: boolean = true;
+  isLoadingResults = true;
   screenWidth: number;
   displayColumns: string[];
   selectTableRowArrayPipe = new SelectTableRowArrayPipe();

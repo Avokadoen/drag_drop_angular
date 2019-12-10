@@ -1,7 +1,9 @@
+import {StorageEntityMeta} from './storage-entity';
+
 export interface EntityWsEvent {
-  timestamp:              number;
-  movingBarcode:          string;
-  previousParentBarcode:  string;
-  newParentBarcode:       string;
+  timestamp: number;
+  source: StorageEntityMeta;
+  currentParentBarcode: string;
+  newParentBarcode: string;
 }
 
