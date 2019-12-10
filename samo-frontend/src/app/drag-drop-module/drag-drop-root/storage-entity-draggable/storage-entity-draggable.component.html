@@ -8,7 +8,7 @@
      [cdkDropListData]="parentEntity"
      [cdkDropListConnectedTo]="storageNode.barcode | removeSelf: allPossibleEntityRelations"
      (cdkDropListDropped)="onDragDrop($event)">
-  <!-- Drag handler. Defines value of what we drag -->
+  <!-- drag handler. Defines value of what we drag -->
   <div cdkDrag
        [id]="storageNode.barcode"
        [cdkDragData]="storageNode"
@@ -16,24 +16,32 @@
        (cdkDragMoved)="onDragMove($event)"
        fxLayout="row">
 
-    <!-- Area that is draggable -->
+    <!-- area that is draggable -->
     <div  title="Drag this entity and its children"
           class="entity-drag-handle"
-          (click)="onNewEntityClicked()"
           cdkDragHandle
           fxFlex="grow"
           fxLayoutGap="25px">
 
-      <mat-icon *ngIf="!dragDisabled">
-        drag_indicator
-      </mat-icon>
-      {{getDisplayString}} - {{getEntityTypeString}}
+      <!-- draggable overview section -->
+      <div fxLayout="row" fxFlex="40" fxLayoutGap="4px">
+        <mat-icon *ngIf="!dragDisabled" [style.margin]="'15px 0 15px 0'">
+          drag_indicator
+        </mat-icon>
+        <p>{{getNodeDescriptor}}</p>
+        <p *ngIf="hideChildren"> with {{formattedDescription}}</p>
+      </div>
 
-      <!-- button to hide children -->
-      <div fxFlex="grow" dir="rtl" fxLayout="row" fxLayoutGap="40px" *ngIf="!isObjectType">
-        <button mat-button (click)="toggleHidden()">
-          <mat-icon *ngIf="!isHidden">keyboard_arrow_down</mat-icon>
-          <mat-icon *ngIf="isHidden">keyboard_arrow_up</mat-icon>
+      <div fxFlex="60" dir="rtl" fxLayout="row" fxLayoutGap="40px">
+        <!-- button to hide children -->
+        <button mat-button (click)="onToggleHiddenClicked()" [style.visibility]="isObjectType || isDeleteNode ? 'hidden': 'visible'">
+          <mat-icon *ngIf="hideChildren">keyboard_arrow_down</mat-icon>
+          <mat-icon *ngIf="!hideChildren">keyboard_arrow_up</mat-icon>
+        </button>
+
+        <!-- button to navigate to panel for this node -->
+        <button mat-button (click)="onNodePanelClicked()">
+          <mat-icon>post_add</mat-icon>
         </button>
       </div>
     </div>
@@ -49,8 +57,8 @@
     </div>
   </div>
 
-  <!-- List of all children of current node -->
-  <ul *ngIf="!isObjectType && !isHidden"
+  <!-- list of all children of current node -->
+  <ul *ngIf="!isObjectType && !hideChildren"
       cdkDropList
       class="entity-drop-zone"
       [id]="storageNode.barcode"

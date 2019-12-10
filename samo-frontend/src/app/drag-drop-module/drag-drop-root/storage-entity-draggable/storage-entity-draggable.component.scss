@@ -18,9 +18,9 @@ ul, li {
   &-drag {
     &-handle {
       min-height: 75px;
+      cursor: move;
       display: inline-flex;
       align-items: center;
-      cursor: move;
     }
 
     &-preview {

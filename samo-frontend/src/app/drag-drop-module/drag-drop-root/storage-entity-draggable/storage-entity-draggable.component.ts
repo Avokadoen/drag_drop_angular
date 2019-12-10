@@ -2,7 +2,7 @@ import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, On
 import {CdkDragDrop, CdkDragEnter, CdkDragMove} from '@angular/cdk/drag-drop';
 import {DisplayStorageEntity, StorageEntityMeta} from '../../model/storage-entity';
 import {interval} from 'rxjs';
-import {endWith, map, startWith, take} from 'rxjs/operators';
+import {endWith, map, startWith, take, takeUntil} from 'rxjs/operators';
 import {DropBehaviourData} from '../../model/drop-behaviour-data';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog} from '@angular/material/dialog';
@@ -36,16 +36,24 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     return this.storageNode.entityType === EntityType.OBJECT;
   }
 
-  public get isHidden(): boolean {
-    return this.hidden;
+  public get isDeleteNode(): boolean {
+    return this.storageNode.barcode === 'deleteList'
+  }
+
+  public get hideChildren(): boolean {
+    return this.storageNode?.hideChildren;
   }
 
   public get getEntityTypeString(): string {
-    return EntityType[this.storageNode.entityType].toLocaleLowerCase();
+    return !this.isDeleteNode ? `- ${EntityType[this.storageNode.entityType].toLocaleLowerCase()}` : '';
   }
 
   public get getDisplayString() {
     return this.storageNode.alias ?? this.storageNode.barcode;
+  }
+
+  public get getNodeDescriptor(): string {
+    return `${this.getDisplayString} ${this.getEntityTypeString}`;
   }
 
   readonly ILLEGAL_MOVE_COLOR = 'rgb(230, 20, 20, 0.6)';
@@ -67,7 +75,6 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   private formattedDescription: string;
   private listMargin: string;
   private prevParentId: string;
-  private hidden: boolean;
 
   constructor(private snackBar: MatSnackBar,
               public addEntityDialog: MatDialog) {
@@ -76,7 +83,6 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     this.entityImport = new EventEmitter<EntityImportEvent>();
 
     this.prevParentId = '';
-    this.hidden       = false;
   }
 
   // TODO: do we want shallow child count?
@@ -118,18 +124,14 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
 }
 
   ngOnChanges() {
-    // update table
-
     this.storageNode.containerElementRefCache = new ElementRef(document.getElementById(this.parentEntityId));
 
-    // if margin needs to be updated
-    // move to pipe?
+    const childCount = this.getChildCount;
+    this.formattedDescription = (childCount > 0 ? `${childCount} child entities` : 'no children');
+
     if (this.prevParentId !== this.parentEntityId) {
       const marginlr  = Math.max(30 - this.depth * 2, 0);
       this.listMargin = `0 ${marginlr}px 0 ${marginlr}px`;
-
-      const childCount = this.getChildCount;
-      this.formattedDescription = (childCount > 0 ? `${childCount} child entities` : 'no children');
 
       this.prevParentId = this.parentEntityId;
     }
@@ -203,14 +205,15 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   }
 
   // TODO: move this as a static of the dialog component
-  onNewEntityClicked() {
+  onNodePanelClicked() {
     const dialogConfig: NewEntityDialogConfig = this.storageNode as NewEntityDialogConfig;
 
     const dialogRef = this.addEntityDialog.open(StorageEntityPanelComponent, {
       minWidth: '300px',
       maxWidth: '1000px',
       width: '25vh',
-      data: dialogConfig
+      data: dialogConfig,
+      disableClose: true,
     });
 
     dialogRef.afterClosed().subscribe((result: NewEntityDialogData) => {
@@ -233,11 +236,11 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     });
   }
 
-  childTrackByFn(index: number, child: DisplayStorageEntity): string {
-    return child.barcode + index;
+  onToggleHiddenClicked() {
+    this.storageNode.hideChildren = !this.storageNode.hideChildren;
   }
 
-  toggleHidden() {
-    this.hidden = !this.hidden;
+  childTrackByFn(index: number, child: DisplayStorageEntity): string {
+    return child.barcode + index;
   }
 }

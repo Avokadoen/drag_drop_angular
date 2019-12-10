@@ -6,6 +6,7 @@ export interface DisplayStorageEntity {
   entityType: EntityType;
   children: StorageEntity[] | DisplayStorageEntity[];
   containerElementRefCache?: ElementRef<Element>;
+  hideChildren?: boolean;
   alias?: string;
 }
 
@@ -17,7 +18,8 @@ export interface UtilityStorageEntity {
   entityType: EntityType.LOCATION;
   children: [];
   containerElementRefCache?: ElementRef<Element>;
-  alias?: string;
+  hideChildren: boolean;
+  alias: string;
 }
 
 export interface StorageEntity {

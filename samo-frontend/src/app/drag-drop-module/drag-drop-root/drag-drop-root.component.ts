@@ -48,6 +48,7 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
     barcode: 'deleteList',
     alias: 'delete list',
     entityType: EntityType.LOCATION,
+    hideChildren: false,
     children: [],
   };
 

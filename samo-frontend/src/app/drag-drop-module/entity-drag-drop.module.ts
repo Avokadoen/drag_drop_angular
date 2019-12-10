@@ -20,6 +20,8 @@ import {MocktidevService} from './storage-entity-services/mocktidev.service';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {StorageRootResolver} from './storage-root-resolver';
 import { EventListComponent } from './drag-drop-root/event-list/event-list.component';
+import {TextIconAlignDirective} from "./directives/text-icon-align.directive";
+import { ConfirmClosePanelComponent } from './confirm-close-panel/confirm-close-panel.component';
 
 
 @NgModule({
@@ -44,6 +46,8 @@ import { EventListComponent } from './drag-drop-root/event-list/event-list.compo
     RemoveSelfPipe,
     StorageEntityPanelComponent,
     EventListComponent,
+    TextIconAlignDirective,
+    ConfirmClosePanelComponent,
   ],
   exports: [
     DragDropRootComponent,
@@ -53,6 +57,6 @@ import { EventListComponent } from './drag-drop-root/event-list/event-list.compo
     MocktidevService,
     StorageRootResolver
   ],
-  entryComponents: [StorageEntityPanelComponent]
+  entryComponents: [StorageEntityPanelComponent, ConfirmClosePanelComponent]
 })
 export class EntityDragDropModule { }
