@@ -1,9 +1,15 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DisplayStorageEntity, StorageEntity, StorageEntityMeta, UtilityStorageEntity} from '../model/storage-entity';
+import {Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  DisplayStorageEntity, FindMode,
+  findNode,
+  StorageEntity,
+  StorageEntityMeta,
+  UtilityStorageEntity
+} from '../model/storage-entity';
 import {EntityType} from '../model/entity-type.enum';
-import {CdkDragDrop, CdkDragMove, moveItemInArray, transferArrayItem, } from '@angular/cdk/drag-drop';
+import {CdkDragDrop, CdkDragMove, moveItemInArray, transferArrayItem,} from '@angular/cdk/drag-drop';
 import {ScreenPosition} from '../model/screen-position';
-import {DropBehaviourData} from '../model/drop-behaviour-data';
+import {DropBehaviourData, formatIllegalDropMessage} from '../model/drop-behaviour-data';
 import {MatSidenav} from '@angular/material/sidenav';
 import {WebSocketService} from '../storage-entity-services/web-socket/web-socket.service';
 import {EntityWsEvent} from '../model/entity-ws-event';
@@ -13,11 +19,7 @@ import {Subject} from 'rxjs';
 import {cdkEventIntoNodeChange, NodeChange} from '../model/node-change-event';
 import {ActivatedRoute} from '@angular/router';
 import {EntityImportEvent} from '../model/entity-import-event';
-
-enum FindMode {
-  SPECIFIC,
-  PARENT,
-}
+import {ProgmatDelete} from "../model/progmat-delete";
 
 enum Move {
   NEW_PARENT,
@@ -39,9 +41,9 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
       .reverse();
   }
 
-  constructor(private webSocketService: WebSocketService,
-              private route: ActivatedRoute,
-              private snackBar: MatSnackBar, ) {
+  // TODO: this should be in the backend and support pagination and filter/search
+  public get getEventList(): EntityWsEvent[] {
+    return this.webSocketService.getEventList;
   }
 
   readonly DELETE_NODE: UtilityStorageEntity = {
@@ -75,6 +77,9 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
   currentEntityEvent: CdkDragMove<DisplayStorageEntity> | null;
   private failedToLoad: boolean;
 
+  @Output()
+  onUndoComplete: Subject<EntityWsEvent>;
+
   private static calculateNewIndex(releasedPosition: ScreenPosition, newSiblings: DisplayStorageEntity[], moveType: Move): number {
     const siblingCount = newSiblings.length;
     for (let i = 0; i < siblingCount; i++) {
@@ -88,6 +93,13 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
     }
 
     return siblingCount;
+  }
+
+
+  constructor(private webSocketService: WebSocketService,
+              private route: ActivatedRoute,
+              private snackBar: MatSnackBar, ) {
+    this.onUndoComplete = new Subject<EntityWsEvent>();
   }
 
   public ngOnInit() {
@@ -142,9 +154,117 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // TODO: check if same container to avoid sending redundant info
     const change = cdkEventIntoNodeChange(event, 0, targetIndex);
     this.webSocketService.sendMove(change);
     this.handleNodeChange(change);
+  }
+
+  public onProgmatDelete(event: ProgmatDelete) {
+    const movingEntity = event.source;
+    const currentParent = findNode(movingEntity.barcode, this.storageRoot, FindMode.PARENT);
+
+    const change: NodeChange = {
+      movingEntity: movingEntity,
+      currentParent: currentParent,
+      newParent: this.DELETE_NODE,
+      targetIndex: 0,
+    };
+
+    this.webSocketService.sendMove(change);
+    this.handleNodeChange(change);
+  }
+
+
+  public onImportNodeRequest(event: EntityImportEvent) {
+    for (const importTarget of event.importBarcodes) {
+      this.importNode(importTarget, event.source);
+    }
+  }
+
+  private importNode(barcode: string, source: StorageEntity) {
+    const parentNode = findNode(barcode, this.storageRoot, FindMode.PARENT);
+
+    const change: NodeChange = {
+      movingEntity: null,
+      currentParent: parentNode,
+      newParent: source,
+      targetIndex: 0,
+    };
+
+    if (parentNode) {
+      change.movingEntity  = parentNode.children.find(c => c.barcode === barcode);
+
+      if (!this.DROP_DELETE_DATA.predicate(change.movingEntity, null)) {
+        this.snackBar.open(formatIllegalDropMessage(this.DROP_DELETE_DATA, change.movingEntity.entityType, source.entityType), 'ok', {
+          duration: 20000,
+          verticalPosition: 'top',
+        });
+      }
+
+      this.webSocketService.sendMove(change);
+      this.handleNodeChange(change);
+    } else {
+      const newEntity: StorageEntity = {
+        barcode,
+        entityType: Math.trunc(Math.random() * source.entityType.valueOf()) as EntityType,
+        children: [],
+      };
+
+      change.movingEntity = newEntity;
+
+      this.webSocketService.sendCreate(change);
+      source.children = source.children.concat(newEntity);
+    }
+  }
+
+  // TODO: handle undoing a move out of a now deleted container
+  public onUndoEvent(event: EntityWsEvent) {
+    const currentParent = (event.newParentBarcode !== 'deleteList')
+      ? findNode(event.newParentBarcode, this.storageRoot, FindMode.SPECIFIC)
+      : null;
+
+    const movingEntity = (event.newParentBarcode !== 'deleteList')
+      ? currentParent?.children.find(c => c.barcode === event.source.barcode) ?? findNode(event.source.barcode, this.storageRoot, FindMode.SPECIFIC)
+      : {
+        barcode: event.source.barcode,
+        entityType: event.source.entityType,
+        children: [],
+      };
+
+    const newParent = (!event.currentParentBarcode) ? this.DELETE_NODE : findNode(event.currentParentBarcode, this.storageRoot, FindMode.SPECIFIC);
+    if (!newParent) {
+      this.snackBar.open('Failed to undo event. Maybe old parent is deleted?', 'ok', {
+        duration: 20000,
+        verticalPosition: 'top',
+      });
+      return;
+    }
+
+    const change: NodeChange = {
+      movingEntity: movingEntity,
+      currentParent: currentParent,
+      newParent: newParent, // TODO: DANGEROUS ASSUMPTION
+      targetIndex: 0,
+    };
+
+    if (event.newParentBarcode !== 'deleteList') {
+      if (!change.newParent || !change.currentParent) {
+        this.snackBar.open('Failed to undo event!', 'ok', {
+          duration: 20000,
+          verticalPosition: 'top',
+        });
+        return;
+      }
+
+      this.webSocketService.sendMove(change, true);
+      this.handleNodeChange(change);
+    } else {
+      this.webSocketService.sendCreate(change, true);
+      change.newParent.children.splice(0, 0, change.movingEntity);
+    }
+
+    this.onUndoComplete.next(event);
   }
 
   public handleNodeChange(change: NodeChange, currentIndex?: number) {
@@ -158,8 +278,9 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
       this.currentEntityEvent = null;
       return;
     }
-    if (change.movingEntity.entityType.valueOf() >= change.newParent.entityType.valueOf()) {
-      this.snackBar.open(`${change.movingEntity.barcode} cannot be a child of ${change.newParent.barcode}, invalid type relation`, 'ok', {
+
+    if (!this.DROP_MOVE_DATA.predicate(change.movingEntity, change.newParent)) {
+      this.snackBar.open(formatIllegalDropMessage(this.DROP_MOVE_DATA, change.movingEntity.entityType, change.newParent.entityType), 'ok', {
         duration: 20000,
         verticalPosition: 'top',
       });
@@ -184,97 +305,22 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
     this.currentEntityEvent = null;
   }
 
-  public onImportNodeRequest(event: EntityImportEvent) {
-    for (const importTarget of event.importBarcodes) {
-      this.mockImport(importTarget, event.source);
-    }
-  }
-
-  private mockImport(barcode: string, source: StorageEntity) {
-    const parentNode = this.findNode(barcode, this.storageRoot, FindMode.PARENT);
-
-    const change: NodeChange = {
-      movingEntity: null,
-      currentParent: parentNode,
-      newParent: source,
-      targetIndex: 0,
-    };
-
-    if (parentNode) {
-      change.movingEntity = parentNode.children.find(c => c.barcode === barcode);
-
-      this.webSocketService.sendMove(change);
-      this.handleNodeChange(change);
-
-    } else {
-      const newEntity: StorageEntity = {
-        barcode,
-        entityType: Math.trunc(Math.random() * source.entityType.valueOf()) as EntityType,
-        children: [],
-      };
-
-      change.movingEntity = newEntity;
-
-      this.webSocketService.sendCreate(change);
-      source.children = source.children.concat(newEntity);
-    }
-  }
-
-  // TODO: bug you cant just place object in delete area as element is kinda broken
-  public onMouseOverToggleNav() {
-    if (!this.currentEntityEvent) {
-      return;
-    }
-
-    this.drawer
-      ?.open('program')
-      .catch(err => console.error('failed to open drawer, error: ' + err)); // TODO: handle?
-  }
-
-
-  private findNode(targetBarcode: string, currentTreeNode: DisplayStorageEntity, findMode: FindMode): DisplayStorageEntity | null {
-    switch (findMode) {
-      case FindMode.SPECIFIC:
-        if (currentTreeNode.barcode === targetBarcode) {
-          return currentTreeNode;
-        }
-        break;
-
-      case FindMode.PARENT:
-        if (currentTreeNode.children.findIndex(c => c.barcode === targetBarcode) >= 0) {
-          return currentTreeNode;
-        }
-        break;
-    }
-
-    for (const child of currentTreeNode.children) {
-      const found = this.findNode(targetBarcode, child, findMode);
-      if (found != null) {
-        return found;
-      }
-    }
-
-    return null;
-  }
-
   private simplifyStorageNodes(storageEntity: DisplayStorageEntity): StorageEntityMeta[] {
     let simplifiedNodes = storageEntity.entityType !== EntityType.OBJECT ? [storageEntity as StorageEntityMeta] : [];
     storageEntity.children.forEach((childItem) => { simplifiedNodes = simplifiedNodes.concat(this.simplifyStorageNodes(childItem)); });
     return simplifiedNodes;
   }
 
-  // TODO: this and created can be merged if we assume that not finding the moving entity to be a new one
   private handleWsMoveEvent(event: EntityWsEvent): void {
-    const parentNode    = this.findNode(event.source.barcode, this.storageRoot, FindMode.PARENT);
+    const parentNode    = findNode(event.source.barcode, this.storageRoot, FindMode.PARENT);
     const movingNode    = parentNode.children.find(c => c.barcode === event.source.barcode);
     if (!movingNode) {
       return;
     }
 
-    const newParentNode = this.findNode(event.newParentBarcode,     this.storageRoot, FindMode.SPECIFIC);
-
-    // TODO: THIS IS A VERY DANGEROUS ASSUMPTION
-    const newParent     = newParentNode ?? this.DELETE_NODE;
+    const newParent = (event.newParentBarcode === this.DELETE_NODE.barcode)
+                          ? this.DELETE_NODE
+                          : findNode(event.newParentBarcode, this.storageRoot, FindMode.SPECIFIC);
 
     const change: NodeChange = {
       movingEntity:   movingNode,
@@ -287,7 +333,7 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
   }
 
   private handleWsCreateEvent(event: EntityWsEvent): void {
-    const targetParent                = this.findNode(event.newParentBarcode, this.storageRoot, FindMode.SPECIFIC);
+    const targetParent                = findNode(event.newParentBarcode, this.storageRoot, FindMode.SPECIFIC);
     const createdNode: StorageEntity  =  {
       barcode: event.source.barcode,
       entityType: event.source.entityType as EntityType,

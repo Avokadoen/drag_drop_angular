@@ -1,0 +1,18 @@
+.event-container {
+  margin: 10px 10px 10px 10px;
+}
+
+.profile-pic {
+  background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+  background-size: cover;
+}
+
+.example-card {
+  max-width: 100%;
+}
+
+.stacked-events {
+  -webkit-box-shadow: -1px 9px 5px 0 rgba(0,0,0,0.75);
+  -moz-box-shadow: -1px 9px 5px 0 rgba(0,0,0,0.75);
+  box-shadow: -1px 9px 5px 0 rgba(0,0,0,0.75);
+}

@@ -10,6 +10,40 @@ export interface DisplayStorageEntity {
   alias?: string;
 }
 
+export enum FindMode {
+  SPECIFIC,
+  PARENT,
+}
+
+export function findNode(targetBarcode: string, currentTreeNode: DisplayStorageEntity, findMode: FindMode): DisplayStorageEntity | null {
+  switch (findMode) {
+    case FindMode.SPECIFIC:
+      if (currentTreeNode.barcode === targetBarcode) {
+        return currentTreeNode;
+      }
+      break;
+
+    case FindMode.PARENT:
+      if (currentTreeNode.children.findIndex(c => c.barcode === targetBarcode) >= 0) {
+        return currentTreeNode;
+      }
+      break;
+
+    default:
+      console.error('findNode() got unknown FindMode');
+      return null;
+  }
+
+  for (const child of currentTreeNode.children) {
+    const found = findNode(targetBarcode, child, findMode);
+    if (found != null) {
+      return found;
+    }
+  }
+
+  return null;
+}
+
 /**
  * can be used for ui elements that has some custom behaviour. i.e delete list
  */

@@ -1,5 +1,6 @@
 import {StorageEntity} from './storage-entity';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {EntityWsEvent} from "./entity-ws-event";
 
 export interface NodeChange {
   movingEntity: StorageEntity;
@@ -16,4 +17,8 @@ export function cdkEventIntoNodeChange(event: CdkDragDrop<StorageEntity>, curren
     newParent: event.container.data,
     targetIndex,
   };
+}
+
+export function isNodeChange(entity: EntityWsEvent | NodeChange): entity is NodeChange  {
+  return (entity as NodeChange).movingEntity !== undefined;
 }

@@ -2,16 +2,17 @@ import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, On
 import {CdkDragDrop, CdkDragEnter, CdkDragMove} from '@angular/cdk/drag-drop';
 import {DisplayStorageEntity, StorageEntityMeta} from '../../model/storage-entity';
 import {interval} from 'rxjs';
-import {endWith, map, startWith, take, takeUntil} from 'rxjs/operators';
-import {DropBehaviourData} from '../../model/drop-behaviour-data';
+import {endWith, map, startWith, take} from 'rxjs/operators';
+import {DropBehaviourData, formatIllegalDropMessage} from '../../model/drop-behaviour-data';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog} from '@angular/material/dialog';
-import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from '../../model/new-entity-dialog-data';
 import {EntityType} from '../../model/entity-type.enum';
 import {StorageEntityPanelComponent} from '../storage-entity-panel/storage-entity-panel.component';
 import {EntityImportEvent} from '../../model/entity-import-event';
+import {EntityPanelAction, EntityPanelDialogConfig, EntityPanelDialogData} from "../../model/entity-panel-dialog-models"
+import {ProgmatDelete} from "../../model/progmat-delete";
 
-// Sources: code is heavily based on Ilya Pakhomov's code that can be found here:
+// Sources: code is heavily inspired on Ilya Pakhomov's code that can be found here:
 // https://stackblitz.com/edit/angular-cdk-nested-drag-drop-demo
 @Component({
   selector: 'app-storage-entity-draggable',
@@ -36,8 +37,8 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
     return this.storageNode.entityType === EntityType.OBJECT;
   }
 
-  public get isDeleteNode(): boolean {
-    return this.storageNode.barcode === 'deleteList'
+  public get isLocation(): boolean {
+    return this.storageNode.entityType === EntityType.LOCATION;
   }
 
   public get hideChildren(): boolean {
@@ -45,7 +46,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   }
 
   public get getEntityTypeString(): string {
-    return !this.isDeleteNode ? `- ${EntityType[this.storageNode.entityType].toLocaleLowerCase()}` : '';
+    return !this.isLocation ? `- ${EntityType[this.storageNode.entityType].toLocaleLowerCase()}` : '';
   }
 
   public get getDisplayString() {
@@ -66,9 +67,10 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   @Input() depth: number;
   @Input() overwriteNodeColor?: string;
 
-  @Output() entityMove: EventEmitter<CdkDragMove<DisplayStorageEntity>>;
-  @Output() entityDrop: EventEmitter<CdkDragDrop<DisplayStorageEntity>>;
-  @Output() entityImport: EventEmitter<EntityImportEvent>;
+  @Output() entityMove:           EventEmitter<CdkDragMove<DisplayStorageEntity>>;
+  @Output() entityDrop:           EventEmitter<CdkDragDrop<DisplayStorageEntity>>;
+  @Output() entityProgmatDelete:  EventEmitter<ProgmatDelete>;
+  @Output() entityImport:         EventEmitter<EntityImportEvent>;
 
   private nodeBackgroundColor: string;
   private dropListBackgroundColor: string;
@@ -78,9 +80,10 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
 
   constructor(private snackBar: MatSnackBar,
               public addEntityDialog: MatDialog) {
-    this.entityDrop   = new EventEmitter<CdkDragDrop<DisplayStorageEntity>>();
-    this.entityMove   = new EventEmitter<CdkDragMove<DisplayStorageEntity>>();
-    this.entityImport = new EventEmitter<EntityImportEvent>();
+    this.entityDrop           = new EventEmitter<CdkDragDrop<DisplayStorageEntity>>();
+    this.entityMove           = new EventEmitter<CdkDragMove<DisplayStorageEntity>>();
+    this.entityProgmatDelete  = new EventEmitter<ProgmatDelete>();
+    this.entityImport         = new EventEmitter<EntityImportEvent>();
 
     this.prevParentId = '';
   }
@@ -124,8 +127,6 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
 }
 
   ngOnChanges() {
-    this.storageNode.containerElementRefCache = new ElementRef(document.getElementById(this.parentEntityId));
-
     const childCount = this.getChildCount;
     this.formattedDescription = (childCount > 0 ? `${childCount} child entities` : 'no children');
 
@@ -136,7 +137,8 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
       this.prevParentId = this.parentEntityId;
     }
 
-
+    // TODO: this should be retrieved on drop, and maybe drag
+    this.storageNode.containerElementRefCache = new ElementRef(document.getElementById(this.parentEntityId));
   }
 
   ngAfterViewInit(): void {
@@ -193,12 +195,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
   }
 
   public toastIllegalDropMessage(movedType: EntityType, targetType: EntityType) {
-    const errMsg = this.dropBehaviourData.illegalDropMessage
-      .replace('{0}', EntityType[movedType].toLocaleLowerCase())
-      .replace('{1}', EntityType[targetType].toLocaleLowerCase());
-
-    this.snackBar.open( errMsg, 'ok', {
-      data: 'Insert an id that exist in (m)optidev',
+    this.snackBar.open(formatIllegalDropMessage(this.dropBehaviourData, movedType, targetType), 'ok', {
       duration: 5500,
       verticalPosition: 'top',
     });
@@ -206,7 +203,7 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
 
   // TODO: move this as a static of the dialog component
   onNodePanelClicked() {
-    const dialogConfig: NewEntityDialogConfig = this.storageNode as NewEntityDialogConfig;
+    const dialogConfig: EntityPanelDialogConfig = this.storageNode as EntityPanelDialogConfig;
 
     const dialogRef = this.addEntityDialog.open(StorageEntityPanelComponent, {
       minWidth: '300px',
@@ -216,22 +213,29 @@ export class StorageEntityDraggableComponent implements OnChanges, OnInit, After
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((result: NewEntityDialogData) => {
-      if (result?.action === NewEntityAction.SUBMIT) {
+    dialogRef.afterClosed().subscribe((result: EntityPanelDialogData) => {
+      switch (result.action) {
+        case EntityPanelAction.SUBMIT:
+          if (result.alias) {
+            this.storageNode.alias = result.alias;
+          }
 
-        if (result.alias) {
-          this.storageNode.alias = result.alias;
-        }
+          if (result.importBarcodes) {
+            const importEvent: EntityImportEvent = {
+              source: this.storageNode,
+              importBarcodes: result.importBarcodes,
+            };
 
-        if (result.importBarcodes) {
-          const importEvent: EntityImportEvent = {
-            source: this.storageNode,
-            importBarcodes: result.importBarcodes,
+            this.entityImport.emit(importEvent);
+          }
+          break;
+        case EntityPanelAction.DELETE:
+          const progmatDelete: ProgmatDelete = {
+            source: this.storageNode
           };
 
-          this.entityImport.emit(importEvent);
-        }
-
+          this.entityProgmatDelete.emit(progmatDelete);
+          break;
       }
     });
   }

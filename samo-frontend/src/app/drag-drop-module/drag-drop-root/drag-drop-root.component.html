@@ -13,16 +13,16 @@
                                   (entityDrop)="onDragDrop($event)"
                                   (entityImport)="onImportNodeRequest($event)">
     </app-storage-entity-draggable>
+
     <mat-divider></mat-divider>
     <h4 class="category-header">Event list</h4>
-    <app-event-list></app-event-list>
+    <app-event-list [eventList]="getEventList" (undoEvent)="onUndoEvent($event)" [undoComplete]="onUndoComplete.asObservable()"></app-event-list>
+
   </mat-drawer>
 
-  <!-- TODO: virtual scroll -->
   <div class="sidenav-content">
     <button class="mat-primary" mat-button
-            (click)="drawer.toggle()"
-            (mouseover)="onMouseOverToggleNav()">
+            (click)="drawer.toggle()">
       Toggle sidenav
     </button>
   </div>
@@ -34,6 +34,7 @@
       [depth]="0"
       (entityDrop)="onDragDrop($event)"
       (entityMove)="onDragMove($event)"
+      (entityProgmatDelete)="onProgmatDelete($event)"
       (entityImport)="onImportNodeRequest($event)">
     </app-storage-entity-draggable>
   </div>

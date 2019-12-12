@@ -21,7 +21,9 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {StorageRootResolver} from './storage-root-resolver';
 import { EventListComponent } from './drag-drop-root/event-list/event-list.component';
 import {TextIconAlignDirective} from "./directives/text-icon-align.directive";
-import { ConfirmClosePanelComponent } from './confirm-close-panel/confirm-close-panel.component';
+import { ConfirmClosePanelComponent } from './drag-drop-root/storage-entity-panel/confirm-close-panel/confirm-close-panel.component';
+import {MatListModule} from "@angular/material/list";
+import {MatCardModule} from "@angular/material/card";
 
 
 @NgModule({
@@ -39,6 +41,8 @@ import { ConfirmClosePanelComponent } from './confirm-close-panel/confirm-close-
     MatInputModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    MatListModule,
+    MatCardModule,
   ],
   declarations: [
     DragDropRootComponent,

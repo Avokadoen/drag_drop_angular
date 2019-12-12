@@ -1,11 +1,16 @@
 import {Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {NewEntityAction, NewEntityDialogConfig, NewEntityDialogData} from '../../model/new-entity-dialog-data';
 import {EntityType} from '../../model/entity-type.enum';
 import {DOCUMENT} from '@angular/common';
-import {Observable, Subject} from 'rxjs';
+import {Subject} from 'rxjs';
 import {delay, takeUntil} from 'rxjs/operators';
-import {ConfirmClosePanelComponent} from "../../confirm-close-panel/confirm-close-panel.component";
+import {ConfirmClosePanelComponent} from "./confirm-close-panel/confirm-close-panel.component";
+import {
+  ConfirmClosePanelConfig,
+  EntityPanelAction,
+  EntityPanelDialogConfig,
+  EntityPanelDialogData
+} from "../../model/entity-panel-dialog-models";
 
 // TODO: refactor logic around handling uncommitted work, as of now the code is very spaghetti
 @Component({
@@ -15,10 +20,10 @@ import {ConfirmClosePanelComponent} from "../../confirm-close-panel/confirm-clos
 })
 export class StorageEntityPanelComponent implements OnDestroy {
 
-  public data: NewEntityDialogData = {
+  public data: EntityPanelDialogData = {
     alias: '',
     importBarcodes: [],
-    action: NewEntityAction.CANCEL,
+    action: EntityPanelAction.CANCEL,
   };
 
   public importTargetBarcode: string;
@@ -33,6 +38,36 @@ export class StorageEntityPanelComponent implements OnDestroy {
   private readonly BARCODE_SPEED  = 9;
   private readonly DESTROYED$     = new Subject<void>();
 
+  readonly discardDesc: ConfirmClosePanelConfig  = {
+    description: 'You are about to discard your changes to this storage entity',
+    conciseDescription: 'discard changes?',
+  };
+
+  readonly submitDiscardDesc: ConfirmClosePanelConfig  = {
+    description: 'You are about to discard un-imported changes',
+    conciseDescription: 'discard changes?',
+  };
+
+  readonly deleteDesc: ConfirmClosePanelConfig  = {
+    description: `You are about to delete ${this.config.barcode}`,
+    conciseDescription: `delete ${this.config.barcode}?`,
+  };
+
+  readonly deleteDialog = (): void => {
+    this.data.action = EntityPanelAction.DELETE;
+    this.dialogRef.close(this.data);
+  };
+
+  readonly cancelDialog = (): void => {
+    this.data.action = EntityPanelAction.CANCEL;
+    this.dialogRef.close(this.data);
+  };
+
+  readonly submitDialog = (): void => {
+    this.data.action = EntityPanelAction.SUBMIT;
+    this.dialogRef.close(this.data);
+  };
+
   private lastImportTargetChange: number;
   private timeBetweenSum: number;
   private scheduleImport$: Subject<void>;
@@ -43,7 +78,7 @@ export class StorageEntityPanelComponent implements OnDestroy {
 
   constructor(public dialogRef: MatDialogRef<StorageEntityPanelComponent>,
               @Inject(DOCUMENT) public document,
-              @Inject(MAT_DIALOG_DATA) public config: NewEntityDialogConfig,
+              @Inject(MAT_DIALOG_DATA) public config: EntityPanelDialogConfig,
               public addEntityDialog: MatDialog) {
 
     this.importTargetBarcode    = '';
@@ -68,29 +103,25 @@ export class StorageEntityPanelComponent implements OnDestroy {
   }
 
   onCancelClick(): void {
-    this.attemptAction(this.hasUncommittedWork, this.cancelDialog);
+    this.attemptAction(this.hasUncommittedWork, this.cancelDialog, this.discardDesc);
   }
 
   onSubmitClick(): void {
-    this.attemptAction(this.importTargetBarcode.length !== 0, this.submitDialog);
+    this.attemptAction(this.importTargetBarcode.length !== 0, this.submitDialog, this.submitDiscardDesc);
   }
 
-  readonly cancelDialog = (): void => {
-    this.data.action = NewEntityAction.CANCEL;
-    this.dialogRef.close(this.data);
-  };
-
-  readonly submitDialog = (): void => {
-    this.data.action = NewEntityAction.SUBMIT;
-    this.dialogRef.close(this.data);
-  };
-
-  attemptAction(predicate: boolean, onConfirmAction: () => void) {
-    predicate ? this.confirmDiscard(onConfirmAction) : onConfirmAction();
+  onDeleteClick(): void {
+    this.confirmDiscard(this.deleteDialog, this.deleteDesc);
   }
 
-  private confirmDiscard(onConfirmAction: () => void): void {
-    const dialogRef = this.addEntityDialog.open(ConfirmClosePanelComponent);
+  attemptAction(predicate: boolean, onConfirmAction: () => void, config: ConfirmClosePanelConfig = this.submitDiscardDesc) {
+    predicate ? this.confirmDiscard(onConfirmAction, config) : onConfirmAction();
+  }
+
+  private confirmDiscard(onConfirmAction: () => void, config: ConfirmClosePanelConfig): void {
+
+
+    const dialogRef = this.addEntityDialog.open(ConfirmClosePanelComponent, {data: config});
     dialogRef.afterClosed().subscribe((yesToClose: boolean) => yesToClose ? onConfirmAction() : false);
   }
 

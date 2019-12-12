@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Confirm action</h1>
+<div mat-dialog-content>
+  <p>
+    {{config.description}}
+  </p>
+  <strong>{{config.conciseDescription}}</strong>
+</div>
+<div mat-dialog-actions>
+  <button mat-button class="mat-primary" [mat-dialog-close]="false">No</button>
+  <button mat-button class="mat-primary" [mat-dialog-close]="true">Yes</button>
+</div>

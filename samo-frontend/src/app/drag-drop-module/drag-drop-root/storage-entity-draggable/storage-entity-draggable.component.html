@@ -32,9 +32,9 @@
         <p *ngIf="hideChildren"> with {{formattedDescription}}</p>
       </div>
 
-      <div fxFlex="60" dir="rtl" fxLayout="row" fxLayoutGap="40px">
+      <div fxFlex="60" dir="rtl" fxLayout="row" fxLayoutGap="5%">
         <!-- button to hide children -->
-        <button mat-button (click)="onToggleHiddenClicked()" [style.visibility]="isObjectType || isDeleteNode ? 'hidden': 'visible'">
+        <button mat-button (click)="onToggleHiddenClicked()" [style.visibility]="isObjectType || isLocation ? 'hidden': 'visible'">
           <mat-icon *ngIf="hideChildren">keyboard_arrow_down</mat-icon>
           <mat-icon *ngIf="!hideChildren">keyboard_arrow_up</mat-icon>
         </button>
@@ -77,6 +77,7 @@
         [depth]="depth + 1"
         (entityDrop)="onDragDrop($event)"
         (entityMove)="onDragMove($event)"
+        (entityProgmatDelete)="entityProgmatDelete.emit($event)"
         (entityImport)="entityImport.emit($event)">
       </app-storage-entity-draggable>
     </li>
