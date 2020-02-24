@@ -3,7 +3,7 @@ import {
   DoCheck,
   EventEmitter,
   Input, IterableDiffer,
-  IterableDiffers,
+  IterableDiffers, OnInit,
   Output,
 } from '@angular/core';
 import {EntityWsEvent} from "../../model/entity-ws-event";
@@ -15,7 +15,7 @@ import {Observable} from "rxjs";
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.css']
 })
-export class EventListComponent implements DoCheck {
+export class EventListComponent implements DoCheck, OnInit {
 
   // expected to be sorted by oldest to newest
   @Input() eventList: EntityWsEvent[];
@@ -28,26 +28,36 @@ export class EventListComponent implements DoCheck {
   @Output()
   undoEvent: EventEmitter<EntityWsEvent>;
 
+  // TODO:
+  //  make root do a auto resize when this event fires
+  //  detect manual undo
+
+  @Output()
+  requestContentResize: EventEmitter<void>;
+
   constructor(private _iterableDiffers: IterableDiffers) {
-    this.undoEvent      = new EventEmitter<EntityWsEvent>();
-    this.eventsMapped   = new Map<string, EntityWsEvent[]>();
-    this.uniqueBarcodes = [];
-    this.iterableDiffer = _iterableDiffers.find([]).create(null);
+    this.undoEvent            = new EventEmitter<EntityWsEvent>();
+    this.requestContentResize = new EventEmitter<void>();
+
+    this.eventsMapped         = new Map<string, EntityWsEvent[]>();
+    this.uniqueBarcodes       = [];
+    this.iterableDiffer       = _iterableDiffers.find([]).create(null);
+  }
+
+  ngOnInit(): void {
+    // TODO: pipe, until destroyed
+    this.undoEvent.subscribe(e => this.onUndoComplete(e));
   }
 
   ngDoCheck() {
     const changes = this.iterableDiffer.diff(this.eventList);
     if (changes) {
-      const beforeSize = this.eventsMapped.size;
       const allBarcodes = this.eventList.map(event => event.source.barcode);
       this.uniqueBarcodes = [... new Set(allBarcodes)];
       for (const barcode of this.uniqueBarcodes) {
-        this.eventsMapped.set(barcode, this.eventList.filter(e => e.source.barcode === barcode));
-      }
-      const afterSize = this.eventsMapped.size;
-
-      if (Math.abs(afterSize - beforeSize) === 1) {
-        console.log('resize!');
+        const list = this.eventList.filter(e => e.source.barcode === barcode);
+        list.length = Math.min(list.length, 10);
+        this.eventsMapped.set(barcode, list);
       }
     }
   }
@@ -74,8 +84,8 @@ export class EventListComponent implements DoCheck {
     return this.eventsMapped.get(barcode)[mostRecent];
   }
 
-  eventFormattedDate(event: EntityWsEvent): string {
+  eventFormattedTimestamp(event: EntityWsEvent): string {
     const dateTimestamp = new Date(event.timestamp*1000);
-    return dateTimestamp.toDateString();
+    return `${dateTimestamp.toDateString()} at ${dateTimestamp.getHours()}:${dateTimestamp.getMinutes()}:${dateTimestamp.getSeconds()}`;
   }
 }

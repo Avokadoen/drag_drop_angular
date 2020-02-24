@@ -10,10 +10,10 @@ import {EntityType} from '../model/entity-type.enum';
 import {CdkDragDrop, CdkDragMove, moveItemInArray, transferArrayItem,} from '@angular/cdk/drag-drop';
 import {ScreenPosition} from '../model/screen-position';
 import {DropBehaviourData, formatIllegalDropMessage} from '../model/drop-behaviour-data';
-import {MatSidenav} from '@angular/material/sidenav';
+import {MatDrawerContainer, MatSidenav} from '@angular/material/sidenav';
 import {WebSocketService} from '../storage-entity-services/web-socket/web-socket.service';
 import {EntityWsEvent} from '../model/entity-ws-event';
-import {takeUntil} from 'rxjs/operators';
+import {delay, takeUntil} from 'rxjs/operators';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Subject} from 'rxjs';
 import {cdkEventIntoNodeChange, NodeChange} from '../model/node-change-event';
@@ -71,6 +71,7 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
   private readonly DESTROYED$ = new Subject();
 
   @ViewChild('drawer', {static: false}) drawer: MatSidenav;
+  @ViewChild('drawerContainer', {static: false}) drawerContainer: MatDrawerContainer;
 
   storageRoot: DisplayStorageEntity;
 
@@ -106,7 +107,7 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
     this.webSocketService.CHANGE$
       .asObservable()
       .pipe(
-        takeUntil(this.DESTROYED$)
+        takeUntil(this.DESTROYED$),
       ).subscribe((wsEvent: EntityWsEvent) => this.handleWsMoveEvent(wsEvent));
 
     this.webSocketService.CREATED$
@@ -114,6 +115,7 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.DESTROYED$)
       ).subscribe((wsEvent: EntityWsEvent) => this.handleWsCreateEvent(wsEvent));
+
 
     const resolve = this.route.snapshot.data.samoResponse;
     if (resolve.errorMessage) {
@@ -268,19 +270,14 @@ export class DragDropRootComponent implements OnInit, OnDestroy {
   }
 
   public handleNodeChange(change: NodeChange, currentIndex?: number) {
-    // TODO: REFACTOR: these lines are very similar ..
-    if (!change.movingEntity || !change.newParent) {
-      this.snackBar.open('Entity tree is out of sync, please refresh page!', 'ok', {
-        duration: 20000,
-        verticalPosition: 'top',
-      });
+    const outOfSync = !change.movingEntity || !change.newParent;
 
-      this.currentEntityEvent = null;
-      return;
-    }
+    if (outOfSync || !this.DROP_MOVE_DATA.predicate(change.movingEntity, change.newParent)) {
+      const errMessage = (outOfSync)
+                          ? 'Entity tree is out of sync, please refresh page!'
+                          : formatIllegalDropMessage(this.DROP_MOVE_DATA, change.movingEntity.entityType, change.newParent.entityType);
 
-    if (!this.DROP_MOVE_DATA.predicate(change.movingEntity, change.newParent)) {
-      this.snackBar.open(formatIllegalDropMessage(this.DROP_MOVE_DATA, change.movingEntity.entityType, change.newParent.entityType), 'ok', {
+      this.snackBar.open(errMessage, 'ok', {
         duration: 20000,
         verticalPosition: 'top',
       });

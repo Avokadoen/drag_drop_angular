@@ -5,6 +5,7 @@ public class EntityWSEvent {
     EntityMeta source;
     String newParentBarcode;
     String currentParentBarcode;
+    boolean wasUndoEvent;
 
     public Integer getTimestamp() {
         return timestamp;
@@ -36,5 +37,13 @@ public class EntityWSEvent {
 
     public void setCurrentParentBarcode(String currentParentBarcode) {
         this.currentParentBarcode = currentParentBarcode;
+    }
+
+    public boolean isWasUndoEvent() {
+        return wasUndoEvent;
+    }
+
+    public void setWasUndoEvent(boolean wasUndoEvent) {
+        this.wasUndoEvent = wasUndoEvent;
     }
 }

@@ -1,9 +1,9 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {RxStomp} from '@stomp/rx-stomp';
-import {EntityWsEvent, isEntityWsEvent} from '../../model/entity-ws-event';
-import {isNodeChange, NodeChange} from '../../model/node-change-event';
+import {EntityWsEvent,} from '../../model/entity-ws-event';
+import {NodeChange} from '../../model/node-change-event';
 import {map, takeUntil} from 'rxjs/operators';
-import {Subject} from 'rxjs';
+import {merge, Subject} from 'rxjs';
 import {environment} from '../../../../environments/environment';
 
 @Injectable({
@@ -44,7 +44,10 @@ export class WebSocketService implements OnDestroy {
 
     // TODO: watchCreator() builds this subscription based on url and subject
     // We don't lazy load this as we always want this connection if the service lives
-    this.RX_STOMP.watch('/stomp_broker/work_area_move').pipe(
+    merge(
+      this.RX_STOMP.watch('/stomp_broker/work_area_move'),
+      this.RX_STOMP.watch('/stomp_broker/work_area_create')
+    ).pipe(
       map<any, EntityWsEvent>((message) => {
         // always use JSON.parse for optimization
         return JSON.parse(message.body);
@@ -56,19 +59,6 @@ export class WebSocketService implements OnDestroy {
         return;
       }
       this.CHANGE$.next(payload);
-    });
-
-    this.RX_STOMP.watch('/stomp_broker/work_area_create').pipe(
-      map<any, EntityWsEvent>((message) => {
-        return JSON.parse(message.body);
-      }),
-      takeUntil(this.DESTROYED$)
-    ).subscribe((payload: EntityWsEvent) => {
-      this.handleUndo(payload);
-      if (this.isSelfSentEvent(payload.timestamp)) {
-        return;
-      }
-      this.CREATED$.next(payload);
     });
   }
 

@@ -1,4 +1,4 @@
-<mat-drawer-container *ngIf="!failedToLoad">
+<mat-drawer-container *ngIf="!failedToLoad" #drawerContainer>
   <mat-drawer #drawer mode="side" opened>
     <!-- TODO: toggle sidenav button in sidenav too -->
     <h4 class="category-header">Drag drop delete</h4>
@@ -16,8 +16,10 @@
 
     <mat-divider></mat-divider>
     <h4 class="category-header">Event list</h4>
-    <app-event-list [eventList]="getEventList" (undoEvent)="onUndoEvent($event)" [undoComplete]="onUndoComplete.asObservable()"></app-event-list>
-
+    <app-event-list [eventList]="getEventList"
+                    [undoComplete]="onUndoComplete.asObservable()"
+                    (undoEvent)="onUndoEvent($event)">
+    </app-event-list>
   </mat-drawer>
 
   <div class="sidenav-content">
