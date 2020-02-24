@@ -4,7 +4,7 @@ but also different aspects of angular, material, flex and websockets. Sadly some
 
 As this code will not be used in production I though it could help others that want to achieve some of the same 
 
-![Websocket demo](ws_demo_undo_stack.gif)
+![Websocket demo](ws_and_stack_demo.gif)
 
 ![Application demo](rest_of_application.gif)
 
